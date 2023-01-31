@@ -5,6 +5,7 @@
 export IMAGE_REPO ?= quay.io/operator-framework/operator-controller
 export IMAGE_TAG ?= devel
 export GO_BUILD_TAGS ?= upstream
+export CERT_MGR_VERSION ?= v1.9.0
 IMG?=$(IMAGE_REPO):$(IMAGE_TAG)
 
 OPERATOR_CONTROLLER_NAMESPACE ?= operator-controller-system
@@ -99,7 +100,7 @@ build: manifests generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 .PHONY: run
-run: docker-build kind-cluster kind-load install deploy wait ## Build the operator-controller then deploy it into a new kind cluster.
+run: docker-build kind-cluster kind-load cert-mgr rukpak install deploy wait ## Build the operator-controller then deploy it into a new kind cluster.
 
 .PHONY: wait
 wait:
@@ -138,6 +139,17 @@ docker-buildx: test ## Build and push docker image for the manager for cross-pla
 ifndef ignore-not-found
   ignore-not-found = false
 endif
+
+## TODO dfranz: replace cert-mgr and rukpak targets with our chosen method of distribution when available
+.PHONY: cert-mgr
+cert-mgr: ## Install cert-manager
+	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/$(CERT_MGR_VERSION)/cert-manager.yaml
+	kubectl wait --for=condition=Available --namespace=cert-manager deployment/cert-manager-webhook --timeout=60s
+
+.PHONY: rukpak
+rukpak: ## Install rukpak
+	kubectl apply -f https://github.com/operator-framework/rukpak/releases/latest/download/rukpak.yaml
+	kubectl wait --for=condition=Available --namespace=rukpak-system deployment/core --timeout=60s
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
