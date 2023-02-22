@@ -2,7 +2,7 @@
 # Configuration Variables #
 ###########################
 # Image URL to use all building/pushing image targets
-export IMAGE_REPO ?= quay.io/operator-framework/operator-controller
+export IMAGE_REPO ?= quay.io/rh_ee_dfranz/operator-controller
 export IMAGE_TAG ?= devel
 export GO_BUILD_TAGS ?= upstream
 export CERT_MGR_VERSION ?= v1.9.0
@@ -95,10 +95,10 @@ kind-cluster-cleanup: kind ## Delete the kind cluster
 
 .PHONY: build
 build: manifests generate fmt vet ## Build manager binary.
-	go build -o bin/manager main.go
+	CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o bin/manager main.go
 
 .PHONY: run
-run: docker-build kind-cluster kind-load cert-mgr rukpak install deploy wait ## Build the operator-controller then deploy it into a new kind cluster.
+run: build docker-build kind-cluster kind-load cert-mgr rukpak install deploy wait ## Build the operator-controller then deploy it into a new kind cluster.
 
 .PHONY: wait
 wait:
@@ -131,6 +131,24 @@ docker-buildx: test ## Build and push docker image for the manager for cross-pla
 	- docker buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
 	- docker buildx rm project-v3-builder
 	rm Dockerfile.cross
+
+###########
+# Release #
+###########
+
+##@ release:
+
+export DISABLE_RELEASE_PIPELINE ?= true
+substitute:
+	envsubst < .goreleaser.template.yml > .goreleaser.yml
+
+release: GORELEASER_ARGS ?= --snapshot --rm-dist --debug
+release: goreleaser substitute ## Run goreleaser
+	$(GORELEASER) $(GORELEASER_ARGS)
+
+quickstart: VERSION ?= $(shell git describe --abbrev=0 --tags)
+quickstart: generate ## Generate the installation release manifests
+	kubectl kustomize manifests | sed "s/:latest/:$(VERSION)/g" > rukpak.yaml
 
 ##@ Deployment
 
@@ -178,6 +196,7 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 KIND ?= $(LOCALBIN)/kind
 GINKGO ?= $(LOCALBIN)/ginkgo
+GORELEASER := $(LOCALBIN)/goreleaser
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
@@ -193,6 +212,11 @@ $(KIND): $(LOCALBIN)
 ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
 $(GINKGO): $(LOCALBIN)
 	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo@v2.1.4
+
+.PHONY: goreleaser
+goreleaser: $(GORELEASER) ## Builds a local copy of goreleaser
+$(GORELEASER): $(LOCALBIN)
+	test -s $(LOCALBIN)/goreleaser || GOBIN=$(LOCALBIN) go install github.com/goreleaser/goreleaser@v1.11.2
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
