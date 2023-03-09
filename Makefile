@@ -2,7 +2,7 @@
 # Configuration Variables #
 ###########################
 # Image URL to use all building/pushing image targets
-export IMAGE_REPO ?= quay.io/operator-framework/operator-controller
+export IMAGE_REPO ?= quay.io/rh_ee_dfranz/operator-controller
 export IMAGE_TAG ?= devel
 export GO_BUILD_TAGS ?= upstream
 export CERT_MGR_VERSION ?= v1.9.0

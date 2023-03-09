@@ -45,6 +45,6 @@ release:
     kubectl wait --for=condition=Available --namespace=rukpak-system deployment/core --timeout=60s
     kubectl wait --for=condition=Available --namespace=rukpak-system deployment/helm-provisioner --timeout=60s
     kubectl wait --for=condition=Available --namespace=rukpak-system deployment/rukpak-webhooks --timeout=60s
-    kubectl apply -f https://github.com/operator-framework/operator-controller/releases/download/{{ .Tag }}/operator-controller.yaml
+    kubectl apply -f https://github.com/dtfranz/operator-controller/releases/download/{{ .Tag }}/operator-controller.yaml
     kubectl wait --for=condition=Available --namespace=operator-controller-system deployment/operator-controller-controller-manager --timeout=60s
     ```
