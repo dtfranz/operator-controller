@@ -2,7 +2,7 @@
 # Configuration Variables #
 ###########################
 # Image URL to use all building/pushing image targets
-export IMAGE_REPO ?= quay.io/operator-framework/operator-controller
+export IMAGE_REPO ?= quay.io/rh_ee_dfranz/operator-controller
 export IMAGE_TAG ?= devel
 export GO_BUILD_TAGS ?= upstream
 export CERT_MGR_VERSION ?= v1.9.0
@@ -144,7 +144,7 @@ export VERSION ?= $(shell git describe --abbrev=0 --tags)
 release: goreleaser ## Runs goreleaser for the operator-controller. By default, this will run only as a snapshot and will not publish any artifacts unless it is run with different arguments. To override the arguments, run with "GORELEASER_ARGS=...". When run as a github action from a tag, this target will publish a full release.
 	$(GORELEASER) $(GORELEASER_ARGS)
 
-quickstart: export MANIFEST="https://github.com/operator-framework/operator-controller/releases/download/$(VERSION)/operator-controller.yaml"
+quickstart: export MANIFEST="https://github.com/dtfranz/operator-controller/releases/download/$(VERSION)/operator-controller.yaml"
 quickstart: kustomize generate ## Generate the installation release manifests and scripts
 	kubectl kustomize config/default | sed "s/:devel/:$(VERSION)/g" > operator-controller.yaml
 	envsubst '$$OLM_V0_VERSION,$$CERT_MGR_VERSION,$$RUKPAK_VERSION,$$MANIFEST' < scripts/install.tpl.sh > install.sh
