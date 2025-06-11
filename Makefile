@@ -256,7 +256,7 @@ image-registry: ## Build the testdata catalog used for e2e tests and push it to 
 test-e2e: KIND_CLUSTER_NAME := operator-controller-e2e
 test-e2e: KUSTOMIZE_BUILD_DIR := config/overlays/e2e
 test-e2e: GO_BUILD_EXTRA_FLAGS := -cover
-test-e2e: run image-registry prometheus e2e e2e-coverage e2e-metrics #HELP Run e2e test suite on local kind cluster
+test-e2e: run image-registry prometheus e2e e2e-coverage e2e-metrics kind-clean #HELP Run e2e test suite on local kind cluster
 
 .PHONY: prometheus
 prometheus: PROMETHEUS_NAMESPACE := olmv1-system
@@ -266,7 +266,7 @@ prometheus: #HELP Deploy Prometheus into specified namespace
 
 .PHONY: e2e-metrics
 e2e-metrics: #HELP Request metrics from prometheus; place in ARTIFACT_PATH if set
-	curl 127.0.0.1:30900/metrics > $(if $(ARTIFACT_PATH),$(ARTIFACT_PATH),.)/metrics.out
+	curl http://127.0.0.1:30900/metrics > $(if $(ARTIFACT_PATH),$(ARTIFACT_PATH),.)/metrics.out
 
 .PHONY: extension-developer-e2e
 extension-developer-e2e: KUSTOMIZE_BUILD_DIR := config/overlays/cert-manager
@@ -316,6 +316,7 @@ kind-cluster: $(KIND) #EXHELP Standup a kind cluster.
 	-$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
 	$(KIND) create cluster --name $(KIND_CLUSTER_NAME) --image $(KIND_CLUSTER_IMAGE) --config ./kind-config.yaml
 	$(KIND) export kubeconfig --name $(KIND_CLUSTER_NAME)
+	kubectl config view -o jsonpath='{.clusters[?(@.name == "kind-operator-controller-e2e")].cluster.server}'
 
 .PHONY: kind-clean
 kind-clean: $(KIND) #EXHELP Delete the kind cluster.

@@ -106,9 +106,12 @@ spec:
     matchLabels:
       app.kubernetes.io/name: prometheus
   policyTypes:
+    - Ingress
     - Egress
   egress:
     - {}  # Allows all egress traffic for metrics requests
+  ingress:
+    - {}
 EOF
 
 # Give the operator time to create the pod
@@ -144,8 +147,8 @@ spec:
           name: prometheus-metrics-token
           key: token
       tlsConfig:
-        insecureSkipVerify: false 
         serverName: operator-controller-service.${NAMESPACE}.svc
+        insecureSkipVerify: false
         ca:
           secret:
             name: olmv1-cert
