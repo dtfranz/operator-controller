@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#TODO dtfranz: The yaml in this file should be pulled out and organized into a kustomization.yaml (where possible) for maintainability/readability
+
 set -euo pipefail
 
 help="setup-monitoring.sh is used to set up prometheus monitoring for e2e testing.
@@ -92,6 +94,7 @@ spec:
     runAsUser: 65534
     seccompProfile:
         type: RuntimeDefault
+  ruleSelector: {}
   serviceDiscoveryRole: EndpointSlice
   serviceMonitorSelector: {}
 EOF
@@ -115,6 +118,49 @@ spec:
     - {}  # Allows us to query prometheus
 EOF
 
+kubectl apply -f - << EOF
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kubelet
+  namespace: olmv1-system
+  labels:
+    k8s-app: kubelet
+spec:
+  jobLabel: k8s-app
+  endpoints:
+  - port: https-metrics
+    scheme: https
+    path: /metrics
+    interval: 10s
+    honorLabels: true
+    tlsConfig:
+      insecureSkipVerify: true
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    metricRelabelings:
+      - action: keep
+        sourceLabels: [pod,container]
+        regex: (operator-controller|catalogd).*;manager
+  - port: https-metrics
+    scheme: https
+    path: /metrics/cadvisor
+    interval: 10s
+    honorLabels: true
+    tlsConfig:
+      insecureSkipVerify: true
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    metricRelabelings:
+      - action: keep
+        sourceLabels: [pod,container]
+        regex: (operator-controller|catalogd).*;manager
+  selector:
+    matchLabels:
+      k8s-app: kubelet
+  namespaceSelector:
+    matchNames:
+    - kube-system
+EOF
+
 # Give the operator time to create the pod
 kubectl wait --for=create pods -n ${NAMESPACE} prometheus-prometheus-0 --timeout=60s
 kubectl wait --for=condition=Ready pods -n ${NAMESPACE} prometheus-prometheus-0 --timeout=120s
@@ -131,6 +177,68 @@ metadata:
     kubernetes.io/service-account.name: prometheus
 EOF
 
+kubectl apply -f - << EOF
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: controller-alerts
+  namespace: ${NAMESPACE}
+spec:
+  groups:
+  - name: controller-panic
+    rules:
+    - alert: reconciler-panic
+      expr: controller_runtime_reconcile_panics_total{} > 0
+      annotations:
+        description: "controller of pod {{ \$labels.pod }} experienced panic(s); count={{ \$value }}"
+    - alert: webhook-panic
+      expr: controller_runtime_webhook_panics_total{} > 0
+      annotations:
+        description: "controller webhook of pod {{ \$labels.pod }} experienced panic(s); count={{ \$value }}"
+  - name: resource-usage
+    rules:
+    - alert: oom-events
+      expr: container_oom_events_total > 0
+      annotations:
+        description: "container {{ \$labels.container }} of pod {{ \$labels.pod }} experienced OOM event(s); count={{ \$value }}"
+    - alert: operator-controller-memory-growth
+      expr: deriv(sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"})[5m:]) > 50_000
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "operator-controller pod memory usage growing at a high rate for 5 minutes: {{ \$value | humanize }}B/sec"
+    - alert: catalogd-memory-growth
+      expr: deriv(sum(container_memory_working_set_bytes{pod=~"catalogd.*",container="manager"})[5m:]) > 50_000
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "catalogd pod memory usage growing at a high rate for 5 minutes: {{ \$value | humanize }}B/sec"
+    - alert: operator-controller-memory-usage
+      expr: sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"}) > 100_000_000
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "operator-controller pod using high memory resources for the last 5 minutes: {{ \$value | humanize }}B"
+    - alert: catalogd-memory-usage
+      expr: sum(container_memory_working_set_bytes{pod=~"catalogd.*",container="manager"}) > 75_000_000
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "catalogd pod using high memory resources for the last 5 minutes: {{ \$value | humanize }}B"
+    - alert: operator-controller-cpu-usage
+      expr: rate(container_cpu_usage_seconds_total{pod=~"operator-controller.*",container="manager"}[5m]) * 100 > 20
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "operator-controller using high cpu resource for 5 minutes: {{ \$value | printf \"%.2f\" }}%"
+    - alert: catalogd-cpu-usage
+      expr: rate(container_cpu_usage_seconds_total{pod=~"catalogd.*",container="manager"}[5m]) * 100 > 20
+      for: 5m
+      keep_firing_for: 1d
+      annotations:
+        description: "catalogd using high cpu resources for 5 minutes: {{ \$value | printf \"%.2f\" }}%"
+EOF
+
 # ServiceMonitors for operator-controller and catalogd
 kubectl apply -f - <<EOF
 apiVersion: monitoring.coreos.com/v1
@@ -141,6 +249,7 @@ metadata:
 spec:
   endpoints:
     - path: /metrics
+      interval: 10s
       port: https
       scheme: https
       authorization:
@@ -178,6 +287,7 @@ spec:
   endpoints:
     - path: /metrics
       port: metrics
+      interval: 10s
       scheme: https
       authorization:
         credentials:

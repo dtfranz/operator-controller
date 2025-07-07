@@ -285,11 +285,9 @@ prometheus: #EXHELP Deploy Prometheus into specified namespace
 # prometheus. Prometheus will gather metrics we currently query for over the test run, 
 # and provide alerts from the metrics based on the rules that we set.
 .PHONY: e2e-metrics
-e2e-metrics: #EXHELP Request metrics from prometheus; place in ARTIFACT_PATH if set
-	curl -X POST \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	--data 'query={pod=~"operator-controller-controller-manager-.*|catalogd-controller-manager-.*"}' \
-	http://localhost:30900/api/v1/query > $(if $(ARTIFACT_PATH),$(ARTIFACT_PATH),.)/metrics.out
+e2e-metrics: ALERTS_FILE_PATH := $(if $(ARTIFACT_PATH),$(ARTIFACT_PATH),.)/alerts.out
+e2e-metrics: #EXHELP Request metrics from prometheus; select only actively firing alerts; place in ARTIFACT_PATH if set
+	curl -X GET http://localhost:30900/api/v1/alerts | jq 'if (.data.alerts | length) > 0 then .data.alerts.[] else empty end' > $(ALERTS_FILE_PATH)
 
 .PHONY: extension-developer-e2e
 extension-developer-e2e: KIND_CLUSTER_NAME := operator-controller-ext-dev-e2e
