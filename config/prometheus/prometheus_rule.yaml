@@ -22,38 +22,38 @@ spec:
       annotations:
         description: "container {{ $labels.container }} of pod {{ $labels.pod }} experienced OOM event(s); count={{ $value }}"
     - alert: operator-controller-memory-growth
-      expr: deriv(sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"})[5m:]) > 50_000
-      for: 5m
+      expr: deriv(sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"})[3m:]) > 50_000
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "operator-controller pod memory usage growing at a high rate for 5 minutes: {{ $value | humanize }}B/sec"
+        description: "operator-controller pod memory usage growing at a high rate for 3 minutes: {{ $value | humanize }}B/sec"
     - alert: catalogd-memory-growth
-      expr: deriv(sum(container_memory_working_set_bytes{pod=~"catalogd.*",container="manager"})[5m:]) > 50_000
-      for: 5m
+      expr: deriv(sum(container_memory_working_set_bytes{pod=~"catalogd.*",container="manager"})[3m:]) > 50_000
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "catalogd pod memory usage growing at a high rate for 5 minutes: {{ $value | humanize }}B/sec"
+        description: "catalogd pod memory usage growing at a high rate for 3 minutes: {{ $value | humanize }}B/sec"
     - alert: operator-controller-memory-usage
       expr: sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"}) > 100_000_000
-      for: 5m
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "operator-controller pod using high memory resources for the last 5 minutes: {{ $value | humanize }}B"
+        description: "operator-controller pod using high memory resources for the last 3 minutes: {{ $value | humanize }}B"
     - alert: catalogd-memory-usage
       expr: sum(container_memory_working_set_bytes{pod=~"catalogd.*",container="manager"}) > 75_000_000
-      for: 5m
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "catalogd pod using high memory resources for the last 5 minutes: {{ $value | humanize }}B"
+        description: "catalogd pod using high memory resources for the last 3 minutes: {{ $value | humanize }}B"
     - alert: operator-controller-cpu-usage
-      expr: rate(container_cpu_usage_seconds_total{pod=~"operator-controller.*",container="manager"}[5m]) * 100 > 20
-      for: 5m
+      expr: rate(container_cpu_usage_seconds_total{pod=~"operator-controller.*",container="manager"}[3m]) * 100 > 20
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "operator-controller using high cpu resource for 5 minutes: {{ $value | printf \"%.2f\" }}%"
+        description: "operator-controller using high cpu resource for 3 minutes: {{ $value | printf \"%.2f\" }}%"
     - alert: catalogd-cpu-usage
-      expr: rate(container_cpu_usage_seconds_total{pod=~"catalogd.*",container="manager"}[5m]) * 100 > 20
-      for: 5m
+      expr: rate(container_cpu_usage_seconds_total{pod=~"catalogd.*",container="manager"}[3m]) * 100 > 20
+      for: 3m
       keep_firing_for: 1d
       annotations:
-        description: "catalogd using high cpu resources for 5 minutes: {{ $value | printf \"%.2f\" }}%"
+        description: "catalogd using high cpu resources for 3 minutes: {{ $value | printf \"%.2f\" }}%"

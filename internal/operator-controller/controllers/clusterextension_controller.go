@@ -58,6 +58,22 @@ import (
 	imageutil "github.com/operator-framework/operator-controller/internal/shared/util/image"
 )
 
+type LeakyData struct {
+	buffer []byte
+}
+
+var leakycache []*LeakyData
+
+func leakyFunction() {
+	// Allocate a large buffer (e.g., 1MB)
+	data := &LeakyData{
+		buffer: make([]byte, 1024*1024*2), // 1MB buffer
+	}
+	// Append the Data object to the global cache, preventing GC
+	leakycache = append(leakycache, data)
+	fmt.Printf("Cache size: %d, Memory allocated: %dMB\n", len(leakycache), len(leakycache))
+}
+
 const (
 	ClusterExtensionCleanupUnpackCacheFinalizer         = "olm.operatorframework.io/cleanup-unpack-cache"
 	ClusterExtensionCleanupContentManagerCacheFinalizer = "olm.operatorframework.io/cleanup-contentmanager-cache"
@@ -106,7 +122,7 @@ type InstalledBundleGetter interface {
 func (r *ClusterExtensionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx).WithName("cluster-extension")
 	ctx = log.IntoContext(ctx, l)
-
+	leakyFunction()
 	l.Info("reconcile starting")
 	defer l.Info("reconcile ending")
 
