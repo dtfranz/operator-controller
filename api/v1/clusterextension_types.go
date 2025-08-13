@@ -91,7 +91,7 @@ type ClusterExtensionSpec struct {
 	// for the ClusterExtension such as the pre-flight check configuration.
 	//
 	// +optional
-	Install *ClusterExtensionInstallConfig `json:"install,omitempty"`
+	Install ClusterExtensionInstallConfig `json:"install,omitempty"`
 }
 
 const SourceTypeCatalog = "Catalog"
