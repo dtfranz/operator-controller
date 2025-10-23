@@ -37,8 +37,8 @@ spec:
         - alert: operator-controller-memory-usage
           annotations:
             description: 'operator-controller pod using high memory resources for the last 5 minutes: {{`{{ $value | humanize }}`}}B'
-          expr: sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"}) > 100_000_000
-          for: 5m
+          expr: sum(container_memory_working_set_bytes{pod=~"operator-controller.*",container="manager"}) > 100_000
+          for: 1s
           keep_firing_for: 1d
         - alert: catalogd-memory-usage
           annotations:

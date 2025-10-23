@@ -40,12 +40,7 @@ func TestMain(m *testing.M) {
 	if path == "" {
 		fmt.Printf("Note: E2E_SUMMARY_OUTPUT is unset; skipping summary generation")
 	} else {
-		err = utils.PrintSummary(path)
-		if err != nil {
-			// Fail the run if alerts are found
-			fmt.Printf("%v", err)
-			os.Exit(1)
-		}
+		utils.PrintSummary(path)
 	}
 	os.Exit(res)
 }

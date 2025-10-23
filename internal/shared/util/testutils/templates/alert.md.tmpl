@@ -6,11 +6,13 @@
 | State  | {{ .State }} |
 {{- end}}
 
+{{ if .FiringAlerts }}
 ### Firing Alerts
 {{ range .FiringAlerts }}
 {{ template "alert" .}}
-{{ end }}
+{{ end }}{{ end }}
+{{ if .PendingAlerts }}
 ### Pending Alerts
 {{ range .PendingAlerts }}
 {{ template "alert" .}}
-{{ end }}
+{{ end }}{{ end }}
