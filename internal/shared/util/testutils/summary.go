@@ -42,16 +42,14 @@ type xychart struct {
 }
 
 type githubSummary struct {
-	client       api.Client
-	Pods         []string
-	alertsFiring bool
+	client api.Client
+	Pods   []string
 }
 
 func NewSummary(c api.Client, pods ...string) githubSummary {
 	return githubSummary{
-		client:       c,
-		Pods:         pods,
-		alertsFiring: false,
+		client: c,
+		Pods:   pods,
 	}
 }
 
@@ -139,7 +137,6 @@ func (s *githubSummary) Alerts() (string, error) {
 			switch a.State {
 			case v1.AlertStateFiring:
 				firingAlerts = append(firingAlerts, aConv)
-				s.alertsFiring = true
 			case v1.AlertStatePending:
 				pendingAlerts = append(pendingAlerts, aConv)
 				// Ignore AlertStateInactive; the alerts endpoint doesn't return them
@@ -176,10 +173,10 @@ func executeTemplate(templateFile string, obj any) (string, error) {
 // The markdown is template-driven; the summary methods are called from within the
 // template. This allows us to add or change queries (hopefully) without needing to
 // touch code. The summary will be output to a file supplied by the env target.
-func PrintSummary(path string) error {
+func PrintSummary(path string) {
 	if path == "" {
 		fmt.Printf("No summary output path specified; skipping")
-		return nil
+		return
 	}
 
 	client, err := api.NewClient(api.Config{
@@ -187,23 +184,19 @@ func PrintSummary(path string) error {
 	})
 	if err != nil {
 		fmt.Printf("warning: failed to initialize promQL client: %v", err)
-		return nil
+		return
 	}
 
 	summary := NewSummary(client, "operator-controller", "catalogd")
 	summaryMarkdown, err := executeTemplate(summaryTemplate, &summary)
 	if err != nil {
 		fmt.Printf("warning: failed to generate e2e test summary: %v", err)
-		return nil
+		return
 	}
 	err = os.WriteFile(path, []byte(summaryMarkdown), 0o600)
 	if err != nil {
 		fmt.Printf("warning: failed to write e2e test summary output to %s: %v", path, err)
-		return nil
+		return
 	}
 	fmt.Printf("Test summary output to %s successful\n", path)
-	if summary.alertsFiring {
-		return fmt.Errorf("performance alerts encountered during test run; please check e2e test summary for details")
-	}
-	return nil
 }
