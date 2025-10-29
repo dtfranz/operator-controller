@@ -23,6 +23,8 @@ jobs:
 
   e2e-kind:
     runs-on: ubuntu-latest
+    outputs:
+      alerts-found: ${{ steps.alert_output.outputs.alerts-found }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -34,7 +36,10 @@ jobs:
 
       - name: Run e2e tests
         run: ARTIFACT_PATH=/tmp/artifacts E2E_SUMMARY_OUTPUT=$GITHUB_STEP_SUMMARY make test-e2e
-
+      - name: Mark for alerts
+        id: alert_output
+        if: contains(github.step_summary, 'Firing Alerts')
+        run: echo "alerts-found=true" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -50,6 +55,8 @@ jobs:
 
   experimental-e2e:
     runs-on: ubuntu-latest
+    outputs:
+      alerts-found: ${{ steps.alert_output.outputs.alerts-found }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -61,7 +68,10 @@ jobs:
 
       - name: Run e2e tests
         run: ARTIFACT_PATH=/tmp/artifacts E2E_SUMMARY_OUTPUT=$GITHUB_STEP_SUMMARY make test-experimental-e2e
-
+      - name: Mark for alerts
+        id: alert_output
+        if: contains(github.step_summary, 'Firing Alerts')
+        run: echo "alerts-found=true" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -111,3 +121,41 @@ jobs:
         name: upgrade-experimental-e2e-artifacts
         path: /tmp/artifacts/
 
+  report-performance:
+    runs-on: ubuntu-latest
+    needs: [ experimental-e2e, e2e-kind ]
+    steps:
+      - name: Find Previous Alert Comment
+        id: find_comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '**Alerts Found**'
+
+      - name: Delete comment
+        uses: detomarco/delete-comments@1.1.0
+        if: |
+          needs.e2e-kind.outputs.alerts-found == false &&
+          needs.experimental-e2e.outputs.alerts-found == false
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+
+      - name: Post Failure Comment
+        uses: peter-evans/create-or-update-comment@v4
+        if: |
+          needs.e2e-kind.outputs.alerts-found == true ||
+          needs.experimental-e2e.outputs.alerts-found == true
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            **Alerts Found**
+
+            /hold
+            
+            A hold has been placed on this PR due to performance alerts during the CI's e2e run.
+            View the summary [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detaills.
+
+            To acknowledge this warning and continue anyway, leave an `/unhold` comment.
