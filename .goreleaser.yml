@@ -118,8 +118,12 @@ checksum:
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
-  use: github-native
+  use: github
   disable: '{{ ne .Env.ENABLE_RELEASE_PIPELINE "true" }}'
+  groups:
+    - title: Dependency Bumps
+      regexp: '^:seedling: Dependabot:.*$'
+      order: 0
 release:
   disable: '{{ ne .Env.ENABLE_RELEASE_PIPELINE "true" }}'
   mode: replace

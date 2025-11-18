@@ -5,13 +5,13 @@ updates:
     schedule:
       interval: "daily"
     commit-message:
-      prefix: ":seedling:"
+      prefix: ":seedling: Dependabot:"
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "daily"
     commit-message:
-      prefix: ":seedling:"
+      prefix: ":seedling: Dependabot:"
     groups:
       k8s-dependencies:
         patterns:
@@ -22,4 +22,4 @@ updates:
     schedule:
       interval: "daily"
     commit-message:
-      prefix: ":seedling:"
+      prefix: ":seedling: Dependabot:"
