@@ -1,0 +1,1 @@
+- [Update OCPSTRAT-3040 TODO](update-ocpstrat-3040-todo.md) — Check off items in `.claude/TODO-OCPSTRAT-3040.md` whenever related work is completed
