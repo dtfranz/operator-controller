@@ -102,8 +102,8 @@ func ValidateClusterExtension(validators ...ClusterExtensionValidator) Reconcile
 func ServiceAccountDeprecationWarning(saClient corev1client.ServiceAccountsGetter) ClusterExtensionValidator {
 	return func(ctx context.Context, ext *ocv1.ClusterExtension) error {
 		l := log.FromContext(ctx)
-		if len(ext.Spec.ServiceAccount.Name) > 0 {
-			l.V(1).Info("WARNING: spec.serviceAccount is deprecated and values provided are no longer used")
+		if len(ext.Spec.ServiceAccount.Name) > 0 { //nolint:staticcheck // intentional read of deprecated field to emit deprecation warning
+			l.Info("spec.serviceAccount is deprecated, ignored, and will be removed in a future release - operator-controller's cluster-admin service account is used for all cluster interactions")
 		}
 		return nil
 	}

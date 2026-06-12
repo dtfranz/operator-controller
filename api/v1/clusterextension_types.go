@@ -50,8 +50,7 @@ const (
 // ClusterExtensionSpec defines the desired state of ClusterExtension
 type ClusterExtensionSpec struct {
 	// namespace specifies a Kubernetes namespace.
-	// This is the namespace where the provided ServiceAccount must exist.
-	// It also designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
+	// It designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
 	// Some extensions may contain namespace-scoped resources to be applied in other namespaces.
 	// This namespace must exist.
 	//
@@ -67,13 +66,13 @@ type ClusterExtensionSpec struct {
 	// +required
 	Namespace string `json:"namespace"`
 
-	// DEPRECATED
-	// serviceAccount was the field used to specify a ServiceAccount which would perform all interactions with the cluster
-	// required to manage an extension. Since operator-controller now runs bound to the cluster-admin role, this field
-	// is no longer used but retained for compatibility.
+	// Deprecated: serviceAccount is no longer used and will be removed in a future release.
+	// OLMv1 is a single-tenant system where users with ClusterExtension write access are
+	// effectively delegated cluster-admin trust. The operator-controller runs with
+	// cluster-admin privileges and uses its own service account for all cluster interactions.
 	//
 	// +optional
-	ServiceAccount ServiceAccountReference `json:"serviceAccount"`
+	ServiceAccount ServiceAccountReference `json:"serviceAccount,omitzero"`
 
 	// source is required and selects the installation source of content for this ClusterExtension.
 	// Set the sourceType field to perform the selection.
@@ -377,10 +376,10 @@ type CatalogFilter struct {
 	UpgradeConstraintPolicy UpgradeConstraintPolicy `json:"upgradeConstraintPolicy,omitempty"`
 }
 
-// ServiceAccountReference identifies the serviceAccount used fo install a ClusterExtension.
+// Deprecated: ServiceAccountReference is no longer used and will be removed in a future release.
 type ServiceAccountReference struct {
-	// DEPRECATED - optional and no longer in use, but preserved for compatibility.
-	// name was a required, immutable reference to the name of the ServiceAccount used for installation
+	// Deprecated: name is no longer used, but preserved for compatibility.
+	// It was a required, immutable reference to the name of the ServiceAccount used for installation
 	// and management of the content for the package specified in the packageName field.
 	//
 	// The name field follows the DNS subdomain standard as defined in [RFC 1123].

@@ -14,8 +14,6 @@ import (
 	"github.com/operator-framework/operator-controller/internal/operator-controller/authentication"
 )
 
-const syntheticServiceAccountName = "olm.synthetic-user"
-
 // SyntheticUserRestConfigMapper returns an AuthConfigMapper that that impersonates synthetic users and groups for Object o.
 // o is expected to be a ClusterExtension. If the service account defined in o is different from 'olm.synthetic-user', the
 // defaultAuthMapper will be used
@@ -24,9 +22,6 @@ func SyntheticUserRestConfigMapper(defaultAuthMapper func(ctx context.Context, o
 		cExt, err := validate(o, c)
 		if err != nil {
 			return nil, err
-		}
-		if cExt.Spec.ServiceAccount.Name != syntheticServiceAccountName {
-			return defaultAuthMapper(ctx, cExt, c)
 		}
 		cc := rest.CopyConfig(c)
 		cc.Wrap(func(rt http.RoundTripper) http.RoundTripper {
