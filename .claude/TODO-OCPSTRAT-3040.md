@@ -30,6 +30,7 @@ Anyone:      Stream 6 (docs) ← after 4
 - [X] Remove SA-based branching from `SyntheticUserRestConfigMapper` (`action/restconfig.go`) — **OPRUN-4630**
 - [X] Fix deprecation warning log level and message in `ServiceAccountDeprecationWarning` — **OPRUN-4630**
 - [X] Remove stale SA reference from `namespace` field godoc — **OPRUN-4630**
+- [X] Add ValidatingAdmissionPolicy to emit kubectl deprecation warning when `serviceAccount` is set — **OPRUN-4630**
 
 ### Stream 2 — Authentication + Action + Labels (Engineer B, no blockers)
 

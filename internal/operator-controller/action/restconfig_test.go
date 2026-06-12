@@ -14,30 +14,6 @@ import (
 	"github.com/operator-framework/operator-controller/internal/operator-controller/action"
 )
 
-func Test_SyntheticUserRestConfigMapper_UsesDefaultConfigMapper(t *testing.T) {
-	isDefaultRequestMapperUsed := false
-	defaultServiceMapper := func(ctx context.Context, o client.Object, c *rest.Config) (*rest.Config, error) {
-		isDefaultRequestMapperUsed = true
-		return c, nil
-	}
-	syntheticAuthServiceMapper := action.SyntheticUserRestConfigMapper(defaultServiceMapper)
-	obj := &ocv1.ClusterExtension{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "my-clusterextension",
-		},
-		Spec: ocv1.ClusterExtensionSpec{
-			ServiceAccount: ocv1.ServiceAccountReference{
-				Name: "my-service-account",
-			},
-			Namespace: "my-namespace",
-		},
-	}
-	actualCfg, err := syntheticAuthServiceMapper(context.Background(), obj, &rest.Config{})
-	require.NoError(t, err)
-	require.NotNil(t, actualCfg)
-	require.True(t, isDefaultRequestMapperUsed)
-}
-
 func Test_SyntheticUserRestConfigMapper_UsesSyntheticAuthMapper(t *testing.T) {
 	syntheticAuthServiceMapper := action.SyntheticUserRestConfigMapper(func(ctx context.Context, o client.Object, c *rest.Config) (*rest.Config, error) {
 		return c, nil

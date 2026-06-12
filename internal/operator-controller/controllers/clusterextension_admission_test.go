@@ -325,31 +325,35 @@ func TestClusterExtensionAdmissionInstallNamespace(t *testing.T) {
 	}
 }
 
-// TestClusterExtensionAdmissionServiceAccount is used only to ensure parity for the deprecated spec.serviceAccount
+// TestClusterExtensionAdmissionServiceAccount validates the deprecated spec.serviceAccount field:
+// - CRD-level validation (format, length) still works
+// - ValidatingAdmissionPolicy emits a deprecation warning for valid non-empty values
 func TestClusterExtensionAdmissionServiceAccount(t *testing.T) {
 	tooLongError := "spec.serviceAccount.name: Too long: may not be more than 253"
 	regexMismatchError := "name must be a valid DNS1123 subdomain"
+	deprecationWarning := "spec.serviceAccount is deprecated"
 
 	testCases := []struct {
 		name           string
 		serviceAccount string
 		errMsg         string
+		warnMsg        string
 	}{
-		{"just alphanumeric", "justalphanumeric1", ""},
-		{"hypen-separated", "hyphenated-name", ""},
-		{"dot-separated", "dotted.name", ""},
-		{"longest valid service account name", strings.Repeat("x", 253), ""},
-		{"too long service account name", strings.Repeat("x", 254), tooLongError},
-		{"no service account name", "", ""},
-		{"spaces", "spaces spaces", regexMismatchError},
-		{"capitalized", "Capitalized", regexMismatchError},
-		{"camel case", "camelCase", regexMismatchError},
-		{"invalid characters", "many/invalid$characters+in_name", regexMismatchError},
-		{"starts with hyphen", "-start-with-hyphen", regexMismatchError},
-		{"ends with hyphen", "end-with-hyphen-", regexMismatchError},
-		{"starts with period", ".start-with-period", regexMismatchError},
-		{"ends with period", "end-with-period.", regexMismatchError},
-		{"multiple sequential separators", "a.-b", regexMismatchError},
+		{"just alphanumeric", "justalphanumeric1", "", deprecationWarning},
+		{"hypen-separated", "hyphenated-name", "", deprecationWarning},
+		{"dot-separated", "dotted.name", "", deprecationWarning},
+		{"longest valid service account name", strings.Repeat("x", 253), "", deprecationWarning},
+		{"too long service account name", strings.Repeat("x", 254), tooLongError, ""},
+		{"no service account name", "", "", ""},
+		{"spaces", "spaces spaces", regexMismatchError, ""},
+		{"capitalized", "Capitalized", regexMismatchError, ""},
+		{"camel case", "camelCase", regexMismatchError, ""},
+		{"invalid characters", "many/invalid$characters+in_name", regexMismatchError, ""},
+		{"starts with hyphen", "-start-with-hyphen", regexMismatchError, ""},
+		{"ends with hyphen", "end-with-hyphen-", regexMismatchError, ""},
+		{"starts with period", ".start-with-period", regexMismatchError, ""},
+		{"ends with period", "end-with-period.", regexMismatchError, ""},
+		{"multiple sequential separators", "a.-b", regexMismatchError, ""},
 	}
 
 	t.Parallel()
@@ -357,7 +361,7 @@ func TestClusterExtensionAdmissionServiceAccount(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			cl := newClient(t)
+			cl, collector := newWarningCapturingClient(t)
 			err := cl.Create(context.Background(), buildClusterExtension(ocv1.ClusterExtensionSpec{
 				Source: ocv1.SourceConfig{
 					SourceType: "Catalog",
@@ -366,7 +370,7 @@ func TestClusterExtensionAdmissionServiceAccount(t *testing.T) {
 					},
 				},
 				Namespace: "default",
-				ServiceAccount: ocv1.ServiceAccountReference{
+				ServiceAccount: ocv1.ServiceAccountReference{ //nolint:staticcheck // testing deprecated field
 					Name: tc.serviceAccount,
 				},
 			}))
@@ -375,6 +379,9 @@ func TestClusterExtensionAdmissionServiceAccount(t *testing.T) {
 			} else {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.errMsg)
+			}
+			if tc.warnMsg != "" {
+				require.True(t, collector.hasWarning(tc.warnMsg), "expected deprecation warning containing %q", tc.warnMsg)
 			}
 		})
 	}

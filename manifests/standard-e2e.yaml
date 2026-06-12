@@ -2147,3 +2147,44 @@ webhooks:
     matchConditions:
       - name: MissingOrIncorrectMetadataNameLabel
         expression: "'name' in object.metadata && (!has(object.metadata.labels) || !('olm.operatorframework.io/metadata.name' in object.metadata.labels) || object.metadata.labels['olm.operatorframework.io/metadata.name'] != object.metadata.name)"
+---
+# Source: olmv1/templates/validatingadmissionpolicy-clusterextension-serviceaccount-deprecated.yml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: clusterextension-serviceaccount-deprecated
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard-e2e
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - olm.operatorframework.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - clusterextensions
+  validations:
+    - expression: "!has(object.spec.serviceAccount) || !has(object.spec.serviceAccount.name) || object.spec.serviceAccount.name == ''"
+      message: "spec.serviceAccount is deprecated, ignored, and will be removed in a future release. The operator-controller's cluster-admin service account is used for all cluster interactions."
+---
+# Source: olmv1/templates/validatingadmissionpolicybinding-clusterextension-serviceaccount-deprecated.yml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: clusterextension-serviceaccount-deprecated
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard-e2e
+spec:
+  policyName: clusterextension-serviceaccount-deprecated
+  validationActions:
+    - Warn
