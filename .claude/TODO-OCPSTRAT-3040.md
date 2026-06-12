@@ -31,7 +31,7 @@ Anyone:      Stream 6 (docs) ← after 4
 - [X] Fix deprecation warning log level and message in `ServiceAccountDeprecationWarning` — **OPRUN-4630** `31cf46b7`
 - [X] Remove stale SA reference from `namespace` field godoc — **OPRUN-4630** `31cf46b7`
 - [X] Add ValidatingAdmissionPolicy to emit kubectl deprecation warning when `serviceAccount` is set — **OPRUN-4630** `16b9c416`
-- [X] Remove `serviceAccount` from all e2e feature files, add `namespace` step, restore incorrectly removed scenarios, clean up dead step code — **OPRUN-4630, OPRUN-4631, OPRUN-4632**
+- [X] Remove `serviceAccount` from all e2e feature files, add `namespace` step, restore incorrectly removed scenarios, clean up dead step code — **OPRUN-4630, OPRUN-4631, OPRUN-4632** `21336533`
 
 ### Stream 2 — Authentication + Action + Labels (Engineer B, no blockers)
 
