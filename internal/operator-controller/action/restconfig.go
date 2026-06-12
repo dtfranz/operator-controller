@@ -40,18 +40,14 @@ func SyntheticUserRestConfigMapper(defaultAuthMapper func(ctx context.Context, o
 // be a ClusterExtension
 func ServiceAccountRestConfigMapper(tokenGetter *authentication.TokenGetter) func(ctx context.Context, o client.Object, c *rest.Config) (*rest.Config, error) {
 	return func(ctx context.Context, o client.Object, c *rest.Config) (*rest.Config, error) {
-		cExt, err := validate(o, c)
-		if err != nil {
-			return nil, err
-		}
 		saConfig := rest.AnonymousClientConfig(c)
 		saConfig.Wrap(func(rt http.RoundTripper) http.RoundTripper {
 			return &authentication.TokenInjectingRoundTripper{
 				Tripper:     rt,
 				TokenGetter: tokenGetter,
 				Key: types.NamespacedName{
-					Name:      cExt.Spec.ServiceAccount.Name,
-					Namespace: cExt.Spec.Namespace,
+					Name:      "operator-controller-controller-manager",
+					Namespace: "olmv1-system",
 				},
 			}
 		})

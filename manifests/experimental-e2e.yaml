@@ -617,7 +617,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.1
+    controller-gen.kubebuilder.io/version: v0.21.0
     olm.operatorframework.io/generator: experimental
   name: clusterextensions.olm.operatorframework.io
 spec:
@@ -791,18 +791,16 @@ spec:
                 type: integer
               serviceAccount:
                 description: |-
-                  serviceAccount specifies a ServiceAccount used to perform all interactions with the cluster
-                  that are required to manage the extension.
-                  The ServiceAccount must be configured with the necessary permissions to perform these interactions.
-                  The ServiceAccount must exist in the namespace referenced in the spec.
-                  The serviceAccount field is required.
+                  DEPRECATED
+                  serviceAccount was the field used to specify a ServiceAccount which would perform all interactions with the cluster
+                  required to manage an extension. Since operator-controller now runs bound to the cluster-admin role, this field
+                  is no longer used but retained for compatibility.
                 properties:
                   name:
                     description: |-
-                      name is a required, immutable reference to the name of the ServiceAccount used for installation
+                      DEPRECATED - optional and no longer in use, but preserved for compatibility.
+                      name was a required, immutable reference to the name of the ServiceAccount used for installation
                       and management of the content for the package specified in the packageName field.
-
-                      This ServiceAccount must exist in the installNamespace.
 
                       The name field follows the DNS subdomain standard as defined in [RFC 1123].
                       It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
@@ -829,9 +827,7 @@ spec:
                         only lowercase alphanumeric characters, hyphens (-) or periods
                         (.), start and end with an alphanumeric character, and be
                         no longer than 253 characters
-                      rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
-                required:
-                - name
+                      rule: size(self) == 0 || self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
                 type: object
               source:
                 description: |-
@@ -1109,7 +1105,6 @@ spec:
                     has(self.catalog) : !has(self.catalog)'
             required:
             - namespace
-            - serviceAccount
             - source
             type: object
           status:
@@ -2159,115 +2154,6 @@ rules:
       - list
       - watch
 ---
-# Source: olmv1/templates/rbac/clusterrole-operator-controller-manager-role.yml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: operator-controller-manager-role
-  labels:
-    app.kubernetes.io/name: operator-controller
-    app.kubernetes.io/part-of: olm
-  annotations:
-    olm.operatorframework.io/feature-set: experimental-e2e
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts/token
-    verbs:
-      - create
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts
-    verbs:
-      - get
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - get
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clustercatalogs
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions
-    verbs:
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions/status
-    verbs:
-      - patch
-      - update
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - clusterrolebindings
-      - clusterroles
-      - rolebindings
-      - roles
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - "*"
-    resources:
-      - "*"
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - get
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterobjectsets
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterobjectsets/status
-    verbs:
-      - patch
-      - update
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterobjectsets/finalizers
-    verbs:
-      - update
----
 # Source: olmv1/templates/rbac/clusterrolebinding-catalogd-manager-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -2338,7 +2224,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: operator-controller-manager-role
+  name: cluster-admin
 subjects:
   - kind: ServiceAccount
     name: operator-controller-controller-manager

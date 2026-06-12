@@ -67,13 +67,12 @@ type ClusterExtensionSpec struct {
 	// +required
 	Namespace string `json:"namespace"`
 
-	// serviceAccount specifies a ServiceAccount used to perform all interactions with the cluster
-	// that are required to manage the extension.
-	// The ServiceAccount must be configured with the necessary permissions to perform these interactions.
-	// The ServiceAccount must exist in the namespace referenced in the spec.
-	// The serviceAccount field is required.
+	// DEPRECATED
+	// serviceAccount was the field used to specify a ServiceAccount which would perform all interactions with the cluster
+	// required to manage an extension. Since operator-controller now runs bound to the cluster-admin role, this field
+	// is no longer used but retained for compatibility.
 	//
-	// +required
+	// +optional
 	ServiceAccount ServiceAccountReference `json:"serviceAccount"`
 
 	// source is required and selects the installation source of content for this ClusterExtension.
@@ -380,10 +379,9 @@ type CatalogFilter struct {
 
 // ServiceAccountReference identifies the serviceAccount used fo install a ClusterExtension.
 type ServiceAccountReference struct {
-	// name is a required, immutable reference to the name of the ServiceAccount used for installation
+	// DEPRECATED - optional and no longer in use, but preserved for compatibility.
+	// name was a required, immutable reference to the name of the ServiceAccount used for installation
 	// and management of the content for the package specified in the packageName field.
-	//
-	// This ServiceAccount must exist in the installNamespace.
 	//
 	// The name field follows the DNS subdomain standard as defined in [RFC 1123].
 	// It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
@@ -404,8 +402,8 @@ type ServiceAccountReference struct {
 	//
 	// +kubebuilder:validation:MaxLength:=253
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="name is immutable"
-	// +kubebuilder:validation:XValidation:rule="self.matches(\"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$\")",message="name must be a valid DNS1123 subdomain. It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.), start and end with an alphanumeric character, and be no longer than 253 characters"
-	// +required
+	// +kubebuilder:validation:XValidation:rule="size(self) == 0 || self.matches(\"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$\")",message="name must be a valid DNS1123 subdomain. It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.), start and end with an alphanumeric character, and be no longer than 253 characters"
+	// +optional
 	Name string `json:"name"`
 }
 
