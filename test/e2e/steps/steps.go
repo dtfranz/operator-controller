@@ -164,6 +164,7 @@ func RegisterSteps(sc *godog.ScenarioContext) {
 	sc.Step(`^(?i)ClusterExtension reconciliation is triggered$`, TriggerClusterExtensionReconciliation)
 
 	sc.Step(`^(?i)ServiceAccount "([^"]*)" with permissions to install extensions is available in "([^"]*)" namespace$`, ServiceAccountWithNeededPermissionsIsAvailableInGivenNamespace)
+	sc.Step(`^(?i)namespace "([^"]*)" is available$`, NamespaceIsAvailable)
 	sc.Step(`^(?i)ServiceAccount "([^"]*)" with needed permissions is available in test namespace$`, ServiceAccountWithNeededPermissionsIsAvailableInTestNamespace)
 
 	sc.Step(`^(?i)ServiceAccount "([^"]*)" is available in test namespace$`, ServiceAccountIsAvailableInNamespace)
@@ -1341,6 +1342,23 @@ func applyPermissionsToServiceAccount(ctx context.Context, serviceAccount, rbacT
 		}
 	}
 
+	return nil
+}
+
+// NamespaceIsAvailable ensures the given namespace exists by applying a namespace template.
+func NamespaceIsAvailable(ctx context.Context, ns string) error {
+	sc := scenarioCtx(ctx)
+	ns = substituteScenarioVars(ns, sc)
+	_, thisFile, _, _ := runtime.Caller(0)
+	yaml, err := templateYaml(filepath.Join(filepath.Dir(thisFile), "testdata", "namespace-template.yaml"), map[string]string{
+		"NAMESPACE": ns,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to template namespace yaml: %v", err)
+	}
+	if _, _, err := k8scliWithInput(yaml, "apply", "-f", "-"); err != nil {
+		return fmt.Errorf("failed to apply namespace %s: %w", ns, err)
+	}
 	return nil
 }
 

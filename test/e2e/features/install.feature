@@ -6,6 +6,7 @@ Feature: Install ClusterExtension
   Background:
     Given OLM is available
     And an image registry is available
+    And namespace "${TEST_NAMESPACE}" is available
 
   Scenario:  Install latest available version
     Given a catalog "test" with packages:
@@ -111,8 +112,259 @@ Feature: Install ClusterExtension
         source:
           sourceType: Catalog
           catalog:
+            packageName: ${PACKAGE:single-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    And ClusterExtension reports Progressing as False with Reason InvalidConfiguration and Message includes:
+      """
+      invalid ClusterExtension configuration: invalid configuration: required field "watchNamespace" is missing
+      """
+    When ClusterExtension is updated to set config.watchNamespace field
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        config:
+          configType: Inline
+          inline:
+            watchNamespace: single-namespace-operator-target # added
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:single-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    Then ClusterExtension reports Installed as True
+    And bundle "${PACKAGE:single-namespace-operator}.1.0.0" is installed in version "1.0.0"
+    And operator "test-operator-${SCENARIO_ID}" target namespace is "single-namespace-operator-target"
+
+  @SingleOwnNamespaceInstallSupport
+  Scenario: watchNamespace config is required for extension supporting own namespace
+    Given a catalog "test" with packages:
+      | package              | version | channel | replaces | contents                                    |
+      | own-namespace-operator | 1.0.0   | alpha   |          | CRD, Deployment, InstallMode(OwnNamespace)   |
+    And ClusterExtension is applied without the watchNamespace configuration
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:own-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    And ClusterExtension reports Progressing as False with Reason InvalidConfiguration and Message includes:
+      """
+      invalid ClusterExtension configuration: invalid configuration: required field "watchNamespace" is missing
+      """
+    And ClusterExtension is updated to include the watchNamespace configuration
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        config:
+          configType: Inline
+          inline:
+            watchNamespace: some-ns # added, but not own namespace
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:own-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    And ClusterExtension reports Progressing as False with Reason InvalidConfiguration and Message includes:
+      """
+      invalid value "some-ns": must be "${TEST_NAMESPACE}"
+      """
+    When ClusterExtension is updated to set watchNamespace to own namespace value
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        config:
+          configType: Inline
+          inline:
+            watchNamespace: ${TEST_NAMESPACE} # own namespace
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:own-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    Then ClusterExtension is rolled out
+    And ClusterExtension is available
+    And operator "test-operator-${SCENARIO_ID}" target namespace is "${TEST_NAMESPACE}"
+
+  @WebhookProviderCertManager
+  Scenario: Install operator having webhooks
+    Given a catalog "test" with packages:
+      | package          | version | channel | replaces | contents                                                               |
+      | webhook-operator | 0.0.1   | alpha   |          | StaticBundleDir(testdata/images/bundles/webhook-operator/v0.0.1)        |
+    When ClusterExtension is applied
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:webhook-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    Then ClusterExtension is rolled out
+    And ClusterExtension is available
+    And resource apply fails with error msg containing "Invalid value: false: Spec.Valid must be true"
+      """
+      apiVersion: webhook.operators.coreos.io/v1
+      kind: WebhookTest
+      metadata:
+        name: ${NAME}
+        namespace: ${TEST_NAMESPACE}
+      spec:
+        valid: false # webhook rejects it as invalid value
+      """
+    And resource is applied
+      """
+      apiVersion: webhook.operators.coreos.io/v1
+      kind: WebhookTest
+      metadata:
+        name: ${NAME}
+        namespace: ${TEST_NAMESPACE}
+      spec:
+        valid: true
+      """
+    And resource "webhooktest/${NAME}" matches
+    """
+      apiVersion: webhook.operators.coreos.io/v2
+      kind: WebhookTest
+      metadata:
+        name: ${NAME}
+        namespace: ${TEST_NAMESPACE}
+      spec:
+        conversion:
+          valid: true
+          mutate: true
+      """
+    And resource "webhooktest.v1.webhook.operators.coreos.io/${NAME}" matches
+    """
+      apiVersion: webhook.operators.coreos.io/v1
+      kind: WebhookTest
+      metadata:
+        name: ${NAME}
+        namespace: ${TEST_NAMESPACE}
+      spec:
+        valid: true
+        mutate: true
+      """
+
+  @SingleOwnNamespaceInstallSupport
+  Scenario: Report failure when watchNamespace has invalid DNS-1123 name
+    Given a catalog "test" with packages:
+      | package                  | version | channel | replaces | contents                                        |
+      | single-namespace-operator | 1.0.0   | alpha   |          | CRD, Deployment, InstallMode(SingleNamespace)    |
+    When ClusterExtension is applied
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        config:
+          configType: Inline
+          inline:
+            watchNamespace: invalid-namespace-
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:single-namespace-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    Then ClusterExtension reports Progressing as False with Reason InvalidConfiguration and Message includes:
+      """
+      invalid ClusterExtension configuration: invalid configuration: field "watchNamespace" must match pattern
+      """
+
+  @SingleOwnNamespaceInstallSupport
+  Scenario: Reject watchNamespace for operator that does not support Single/OwnNamespace install modes
+    Given a catalog "test" with packages:
+      | package          | version | channel | replaces | contents                                                               |
+      | webhook-operator | 0.0.1   | alpha   |          | StaticBundleDir(testdata/images/bundles/webhook-operator/v0.0.1)        |
+    When ClusterExtension is applied
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        config:
+          configType: Inline
+          inline:
+            watchNamespace: ${TEST_NAMESPACE}
+        source:
+          sourceType: Catalog
+          catalog:
+            packageName: ${PACKAGE:webhook-operator}
+            selector:
+              matchLabels:
+                "olm.operatorframework.io/metadata.name": ${CATALOG:test}
+      """
+    Then ClusterExtension reports Progressing as False with Reason InvalidConfiguration and Message includes:
+      """
+      invalid ClusterExtension configuration: invalid configuration: unknown field "watchNamespace"
+      """
+
+  @BoxcutterRuntime
+  Scenario: Report ClusterExtension as not progressing if the rollout does not become available within given timeout
+    Given a catalog "test" with packages:
+      | package | version | channel | replaces | contents |
+      | test    | 1.0.2   | alpha   |          | BadImage |
+    And min value for ClusterExtension .spec.progressDeadlineMinutes is set to 1
+    And min value for ClusterObjectSet .spec.progressDeadlineMinutes is set to 1
+    When ClusterExtension is applied
+      """
+      apiVersion: olm.operatorframework.io/v1
+      kind: ClusterExtension
+      metadata:
+        name: ${NAME}
+      spec:
+        namespace: ${TEST_NAMESPACE}
+        progressDeadlineMinutes: 1
+        source:
+          sourceType: Catalog
+          catalog:
             packageName: ${PACKAGE:test}
-            # bundle refers bad image references, so that the deployment never becomes available
             version: 1.0.2
             selector:
               matchLabels:
@@ -333,7 +585,7 @@ Feature: Install ClusterExtension
       """
     Then ClusterExtension apply emits warning:
       """
-      Warning: spec.serviceAccount is deprecated, ignored, and will be removed in a future release. The operator-controller's cluster-admin service account is used for all cluster interactions.
+      Warning: Validation failed for ValidatingAdmissionPolicy 'clusterextension-serviceaccount-deprecated' with binding 'clusterextension-serviceaccount-deprecated': spec.serviceAccount is deprecated, ignored, and will be removed in a future release. The operator-controller's cluster-admin service account is used for all cluster interactions.
       """
     And ClusterExtension is rolled out
     And ClusterExtension is available

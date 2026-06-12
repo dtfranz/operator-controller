@@ -20,10 +20,10 @@ package v1
 // ServiceAccountReferenceApplyConfiguration represents a declarative configuration of the ServiceAccountReference type for use
 // with apply.
 //
-// ServiceAccountReference identifies the serviceAccount used fo install a ClusterExtension.
+// Deprecated: ServiceAccountReference is no longer used and will be removed in a future release.
 type ServiceAccountReferenceApplyConfiguration struct {
-	// DEPRECATED - optional and no longer in use, but preserved for compatibility.
-	// name was a required, immutable reference to the name of the ServiceAccount used for installation
+	// Deprecated: name is no longer used, but preserved for compatibility.
+	// It was a required, immutable reference to the name of the ServiceAccount used for installation
 	// and management of the content for the package specified in the packageName field.
 	//
 	// The name field follows the DNS subdomain standard as defined in [RFC 1123].

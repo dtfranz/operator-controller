@@ -8,6 +8,7 @@ Feature: Recover cluster extension from errors that might occur during its lifet
       | test    | 1.2.0   | beta    |          | CRD, Deployment, ConfigMap |
 
   Scenario: Restore removed resource
+    And namespace "${TEST_NAMESPACE}" is available
     And ClusterExtension is applied
       """
       apiVersion: olm.operatorframework.io/v1
@@ -47,10 +48,12 @@ Feature: Recover cluster extension from errors that might occur during its lifet
                 "olm.operatorframework.io/metadata.name": ${CATALOG:test}
       """
     And ClusterExtension reports Progressing as True with Reason Retrying
+    When namespace "${TEST_NAMESPACE}" is available
     Then ClusterExtension is available
     And ClusterExtension reports Progressing as True with Reason Succeeded
 
   Scenario: Install ClusterExtension after conflicting resource is removed
+    And namespace "${TEST_NAMESPACE}" is available
     And resource is applied
       """
       apiVersion: apps/v1
@@ -121,6 +124,7 @@ Feature: Recover cluster extension from errors that might occur during its lifet
     # - If the controller stopped reconciling, the configmap would stay deleted
     # - Resource restoration is an observable event that PROVES active reconciliation
     # - The deployment staying healthy proves the workload continues running
+    And namespace "${TEST_NAMESPACE}" is available
     And ClusterExtension is applied
       """
       apiVersion: olm.operatorframework.io/v1
@@ -158,6 +162,7 @@ Feature: Recover cluster extension from errors that might occur during its lifet
     # - Reconciliation completing (observedGeneration == generation) proves the spec was processed
     # - Progressing=Succeeded proves the controller didn't block on missing catalog
     # - Extension staying Available proves workload continues running
+    And namespace "${TEST_NAMESPACE}" is available
     And ClusterExtension is applied
       """
       apiVersion: olm.operatorframework.io/v1

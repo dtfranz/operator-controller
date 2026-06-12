@@ -10,6 +10,7 @@ Feature: HTTPS proxy support for outbound catalog requests
     And a catalog "test" with packages:
       | package | version | channel | replaces | contents                   |
       | test    | 1.2.0   | beta    |          | CRD, Deployment, ConfigMap |
+    And namespace "${TEST_NAMESPACE}" is available
 
   @HTTPProxy
   Scenario: operator-controller respects HTTPS_PROXY when fetching catalog data

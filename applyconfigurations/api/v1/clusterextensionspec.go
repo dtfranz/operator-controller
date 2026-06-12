@@ -23,8 +23,7 @@ package v1
 // ClusterExtensionSpec defines the desired state of ClusterExtension
 type ClusterExtensionSpecApplyConfiguration struct {
 	// namespace specifies a Kubernetes namespace.
-	// This is the namespace where the provided ServiceAccount must exist.
-	// It also designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
+	// It designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
 	// Some extensions may contain namespace-scoped resources to be applied in other namespaces.
 	// This namespace must exist.
 	//
@@ -34,10 +33,10 @@ type ClusterExtensionSpecApplyConfiguration struct {
 	//
 	// [RFC 1123]: https://tools.ietf.org/html/rfc1123
 	Namespace *string `json:"namespace,omitempty"`
-	// DEPRECATED
-	// serviceAccount was the field used to specify a ServiceAccount which would perform all interactions with the cluster
-	// required to manage an extension. Since operator-controller now runs bound to the cluster-admin role, this field
-	// is no longer used but retained for compatibility.
+	// Deprecated: serviceAccount is no longer used and will be removed in a future release.
+	// OLMv1 is a single-tenant system where users with ClusterExtension write access are
+	// effectively delegated cluster-admin trust. The operator-controller runs with
+	// cluster-admin privileges and uses its own service account for all cluster interactions.
 	ServiceAccount *ServiceAccountReferenceApplyConfiguration `json:"serviceAccount,omitempty"`
 	// source is required and selects the installation source of content for this ClusterExtension.
 	// Set the sourceType field to perform the selection.

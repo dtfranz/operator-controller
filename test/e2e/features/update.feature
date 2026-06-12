@@ -14,6 +14,7 @@ Feature: Update ClusterExtension
       | test    | 1.0.2   | alpha   | 1.0.0    | BadImage                   |
       | test    | 1.0.4   | beta    |          | CRD, Deployment, ConfigMap |
       | test    | 1.2.0   | beta    | 1.0.1    | CRD, Deployment, ConfigMap |
+    And namespace "${TEST_NAMESPACE}" is available
 
   Scenario: Update to a successor version
     Given ClusterExtension is applied
