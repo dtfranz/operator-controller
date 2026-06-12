@@ -11,7 +11,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,7 +25,6 @@ import (
 
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/authentication"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/labels"
 )
 
 // RevisionEngine defines the interface for reconciling and tearing down revisions.
@@ -78,20 +76,9 @@ func (f *defaultRevisionEngineFactory) CreateRevisionEngine(_ context.Context, r
 }
 
 func (f *defaultRevisionEngineFactory) getServiceAccount(rev *ocv1.ClusterObjectSet) (string, string, error) {
-	annotations := rev.GetAnnotations()
-	if annotations == nil {
-		return "", "", fmt.Errorf("revision %q is missing required annotations", rev.Name)
-	}
-
-	saName := strings.TrimSpace(annotations[labels.ServiceAccountNameKey])
-	saNamespace := strings.TrimSpace(annotations[labels.ServiceAccountNamespaceKey])
-
-	if len(saName) == 0 {
-		return "", "", fmt.Errorf("revision %q is missing ServiceAccount name annotation", rev.Name)
-	}
-	if len(saNamespace) == 0 {
-		return "", "", fmt.Errorf("revision %q is missing ServiceAccount namespace annotation", rev.Name)
-	}
+	// TODO stubbed until the revision engine is removed
+	saName := "operator-controller-controller-manager"
+	saNamespace := "olmv1-system"
 
 	return saNamespace, saName, nil
 }

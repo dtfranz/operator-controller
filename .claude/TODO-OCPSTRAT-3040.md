@@ -21,10 +21,10 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 1 — API + Helm (Engineer A, no blockers)
 
-- [ ] CRD schema change: `spec.serviceAccount` required → optional — **OPRUN-4630**
-- [ ] CRD upgrade safety validated — **OPRUN-4630**
-- [ ] Emit deprecation warning when `spec.serviceAccount` is set — **OPRUN-4630**
-- [ ] Grant operator-controller cluster-admin ClusterRole in helm RBAC templates — **OPRUN-4630**
+- [X] CRD schema change: `spec.serviceAccount` required → optional — **OPRUN-4630**
+- [X] CRD upgrade safety validated — **OPRUN-4630**
+- [X] Emit deprecation warning when `spec.serviceAccount` is set — **OPRUN-4630**
+- [X] Grant operator-controller cluster-admin ClusterRole in helm RBAC templates — **OPRUN-4630**
 
 ### Stream 2 — Authentication + Action + Labels (Engineer B, no blockers)
 
