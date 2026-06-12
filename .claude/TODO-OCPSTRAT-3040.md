@@ -21,16 +21,16 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 1 — API + Helm (Engineer A, no blockers)
 
-- [X] CRD schema change: `spec.serviceAccount` required → optional — **OPRUN-4630**
-- [X] CRD upgrade safety validated — **OPRUN-4630**
-- [X] Emit deprecation warning when `spec.serviceAccount` is set — **OPRUN-4630**
-- [X] Grant operator-controller cluster-admin ClusterRole in helm RBAC templates — **OPRUN-4630**
-- [X] Fix `Deprecated:` godoc format to follow Go/OpenShift conventions — **OPRUN-4630**
-- [X] Add `omitzero` JSON tag to `serviceAccount` field — **OPRUN-4630**
-- [X] Remove SA-based branching from `SyntheticUserRestConfigMapper` (`action/restconfig.go`) — **OPRUN-4630**
-- [X] Fix deprecation warning log level and message in `ServiceAccountDeprecationWarning` — **OPRUN-4630**
-- [X] Remove stale SA reference from `namespace` field godoc — **OPRUN-4630**
-- [X] Add ValidatingAdmissionPolicy to emit kubectl deprecation warning when `serviceAccount` is set — **OPRUN-4630**
+- [X] CRD schema change: `spec.serviceAccount` required → optional — **OPRUN-4630** `7f5a6843`
+- [X] CRD upgrade safety validated — **OPRUN-4630** `7f5a6843`
+- [X] Emit deprecation warning when `spec.serviceAccount` is set — **OPRUN-4630** `7f5a6843`
+- [X] Grant operator-controller cluster-admin ClusterRole in helm RBAC templates — **OPRUN-4630** `7f5a6843`
+- [X] Fix `Deprecated:` godoc format to follow Go/OpenShift conventions — **OPRUN-4630** `31cf46b7`
+- [X] Add `omitzero` JSON tag to `serviceAccount` field — **OPRUN-4630** `31cf46b7`
+- [X] Remove SA-based branching from `SyntheticUserRestConfigMapper` (`action/restconfig.go`) — **OPRUN-4630** `31cf46b7`
+- [X] Fix deprecation warning log level and message in `ServiceAccountDeprecationWarning` — **OPRUN-4630** `31cf46b7`
+- [X] Remove stale SA reference from `namespace` field godoc — **OPRUN-4630** `31cf46b7`
+- [X] Add ValidatingAdmissionPolicy to emit kubectl deprecation warning when `serviceAccount` is set — **OPRUN-4630** `16b9c416`
 
 ### Stream 2 — Authentication + Action + Labels (Engineer B, no blockers)
 
@@ -39,7 +39,7 @@ Anyone:      Stream 6 (docs) ← after 4
 - [ ] Remove `authentication/synthetic.go` + tests — **OPRUN-4632**
 - [ ] Remove `ServiceAccountRestConfigMapper` from `action/restconfig.go` — **OPRUN-4630**
 - [ ] Remove `SyntheticUserRestConfigMapper` from `action/restconfig.go` + tests — **OPRUN-4632**
-- [X] Remove SA annotations (`ServiceAccountNameKey`, `ServiceAccountNamespaceKey`) from `labels/labels.go` — **OPRUN-4630**
+- [X] Remove SA annotations (`ServiceAccountNameKey`, `ServiceAccountNamespaceKey`) from `labels/labels.go` — **OPRUN-4630** `7f5a6843`
 
 ### Stream 3 — Authorization + Build tooling (Engineer C, no blockers)
 
@@ -50,15 +50,15 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 4 — Integration: Appliers + Controllers + main.go (Engineer D, after streams 1-3)
 
-- [X] Remove `ServiceAccountValidator` reconciliation step — **OPRUN-4630**
-- [X] Remove `getUserInfo()` from Helm applier — **OPRUN-4630**
-- [X] Remove `getUserInfo()` from Boxcutter applier — **OPRUN-4630**
+- [X] Remove `ServiceAccountValidator` reconciliation step — **OPRUN-4630** `7f5a6843`
+- [X] Remove `getUserInfo()` from Helm applier — **OPRUN-4630** `7f5a6843`
+- [X] Remove `getUserInfo()` from Boxcutter applier — **OPRUN-4630** `7f5a6843`
 - [ ] Remove pre-auth checks from Helm applier — **OPRUN-4631**
 - [ ] Remove pre-auth checks from Boxcutter applier — **OPRUN-4631**
 - [ ] Remove `PreflightPermissions` feature gate from `features.go` — **OPRUN-4631**
 - [ ] Remove `SyntheticPermissions` feature gate from `features.go` — **OPRUN-4632**
 - [ ] Clean up RBAC watches if only needed for pre-auth — **OPRUN-4631**
-- [X] Rewire `main.go`: remove all SA/synthetic/preflight wiring, always use controller's own SA — **OPRUN-4630**
+- [X] Rewire `main.go`: remove all SA/synthetic/preflight wiring, always use controller's own SA — **OPRUN-4630** `7f5a6843`
 - [ ] Update all unit + e2e tests — **OPRUN-4630, OPRUN-4631, OPRUN-4632**
 
 > **Ticket close gates:**

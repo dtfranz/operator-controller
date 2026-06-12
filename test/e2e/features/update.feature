@@ -14,7 +14,6 @@ Feature: Update ClusterExtension
       | test    | 1.0.2   | alpha   | 1.0.0    | BadImage                   |
       | test    | 1.0.4   | beta    |          | CRD, Deployment, ConfigMap |
       | test    | 1.2.0   | beta    | 1.0.1    | CRD, Deployment, ConfigMap |
-    And ServiceAccount "olm-sa" with needed permissions is available in test namespace
 
   Scenario: Update to a successor version
     Given ClusterExtension is applied
@@ -25,8 +24,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -52,8 +49,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -73,8 +68,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -98,8 +91,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -119,8 +110,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -145,8 +134,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -175,8 +162,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -204,8 +189,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -234,8 +217,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -260,8 +241,6 @@ Feature: Update ClusterExtension
         name: ${NAME}-dup
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -286,8 +265,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:
@@ -320,8 +297,6 @@ Feature: Update ClusterExtension
         name: ${NAME}
       spec:
         namespace: ${TEST_NAMESPACE}
-        serviceAccount:
-          name: olm-sa
         source:
           sourceType: Catalog
           catalog:

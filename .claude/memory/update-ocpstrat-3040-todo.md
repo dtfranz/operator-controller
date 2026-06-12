@@ -9,4 +9,4 @@ When any work is completed that relates to OCPSTRAT-3040 (cluster-admin scope / 
 
 **Why:** The team uses this checklist to track progress across epics OPRUN-4629 through OPRUN-4634.
 
-**How to apply:** After completing any code change, deletion, or doc task covered by the checklist, immediately edit the TODO file to mark the item done before reporting completion.
+**How to apply:** After completing any code change, deletion, or doc task covered by the checklist, immediately edit the TODO file to mark the item done and append the short commit SHA (e.g. `` `abcd1234` ``). Example: `- [X] Some item — **OPRUN-4630** \`31cf46b7\``
