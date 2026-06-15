@@ -23,7 +23,6 @@ import (
 	helmclient "github.com/operator-framework/helm-operator-plugins/pkg/client"
 
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/authorization"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager/cache"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/features"
@@ -58,7 +57,6 @@ func (h HelmReleaseToObjectsConverter) GetObjectsFromRelease(rel *release.Releas
 type Helm struct {
 	ActionClientGetter            helmclient.ActionClientGetter
 	Preflights                    []Preflight
-	PreAuthorizer                 authorization.PreAuthorizer
 	HelmChartProvider             HelmChartProvider
 	HelmReleaseToObjectsConverter HelmReleaseToObjectsConverterInterface
 
