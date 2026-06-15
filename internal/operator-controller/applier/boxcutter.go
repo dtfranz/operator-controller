@@ -519,8 +519,7 @@ func (bc *Boxcutter) Apply(ctx context.Context, contentFS fs.FS, ext *ocv1.Clust
 		}
 		replaceInlineWithRefs(desiredRevision, packResult)
 
-		// SSA patch (refs-vs-refs). Skip pre-auth — just checking for changes.
-		// createExternalizedRevision runs its own pre-auth if upgrade is needed.
+		// SSA patch (refs-vs-refs) — just checking for changes.
 		err = bc.Client.Apply(ctx, desiredRevision, client.FieldOwner(bc.FieldOwner), client.ForceOwnership)
 
 		// Restore inline objects for preflights + createExternalizedRevision
@@ -611,7 +610,7 @@ func (bc *Boxcutter) createExternalizedRevision(ctx context.Context, ext *ocv1.C
 		}
 	}
 
-	// Step 2: Create COS with refs via SSA (pre-auth already ran above)
+	// Step 2: Create COS with refs via SSA
 	if err := bc.Client.Apply(ctx, desiredRevision, client.FieldOwner(bc.FieldOwner), client.ForceOwnership); err != nil {
 		return fmt.Errorf("creating new Revision: %w", err)
 	}

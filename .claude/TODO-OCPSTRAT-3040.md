@@ -54,11 +54,11 @@ Anyone:      Stream 6 (docs) ← after 4
 - [X] Remove `ServiceAccountValidator` reconciliation step — **OPRUN-4630** `7f5a6843`
 - [X] Remove `getUserInfo()` from Helm applier — **OPRUN-4630** `7f5a6843`
 - [X] Remove `getUserInfo()` from Boxcutter applier — **OPRUN-4630** `7f5a6843`
-- [ ] Remove pre-auth checks from Helm applier — **OPRUN-4631**
-- [ ] Remove pre-auth checks from Boxcutter applier — **OPRUN-4631**
-- [ ] Remove `PreflightPermissions` feature gate from `features.go` — **OPRUN-4631**
+- [X] Remove pre-auth checks from Helm applier — **OPRUN-4631** N/A (PreAuthorizer removed in `9791b717`)
+- [X] Remove pre-auth checks from Boxcutter applier — **OPRUN-4631** N/A (PreAuthorizer removed in `9791b717`)
+- [X] Remove `PreflightPermissions` feature gate from `features.go` — **OPRUN-4631**
 - [ ] Remove `SyntheticPermissions` feature gate from `features.go` — **OPRUN-4632**
-- [ ] Clean up RBAC watches if only needed for pre-auth — **OPRUN-4631**
+- [X] Clean up RBAC watches if only needed for pre-auth — **OPRUN-4631** N/A (RBAC watches serve Boxcutter phase ordering)
 - [X] Rewire `main.go`: remove all SA/synthetic/preflight wiring, always use controller's own SA — **OPRUN-4630** `7f5a6843`
 - [ ] Update all unit + e2e tests — **OPRUN-4630, OPRUN-4631, OPRUN-4632**
 
