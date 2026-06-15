@@ -44,10 +44,10 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 3 — Authorization + Build tooling (Engineer C, no blockers)
 
-- [X] Remove `authorization/` package entirely (~700 lines) — **OPRUN-4631**
-- [X] Remove `k8s.io/kubernetes` dependency (require + replace in go.mod) — **OPRUN-4631**
-- [X] Remove `hack/tools/k8smaintainer/` — **OPRUN-4631**
-- [X] Remove `k8s-pin` Makefile target, simplify `verify` — **OPRUN-4631**
+- [X] Remove `authorization/` package entirely (~700 lines) — **OPRUN-4631** `9791b717`
+- [X] Remove `k8s.io/kubernetes` dependency (require + replace in go.mod) — **OPRUN-4631** `9791b717`
+- [X] Remove `hack/tools/k8smaintainer/` — **OPRUN-4631** `9791b717`
+- [X] Remove `k8s-pin` Makefile target, simplify `verify` — **OPRUN-4631** `9791b717`
 
 ### Stream 4 — Integration: Appliers + Controllers + main.go (Engineer D, after streams 1-3)
 
