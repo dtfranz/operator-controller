@@ -116,6 +116,10 @@ if [ -f "${olmv1_manifest}" ]; then
     olmv1_manifest=file://localhost$(realpath ${olmv1_manifest})
 fi
 
+# Delete the old ClusterRoleBinding if it exists — Kubernetes does not allow
+# changing roleRef via kubectl apply, so we must delete before re-creating.
+kubectl delete clusterrolebinding operator-controller-manager-rolebinding --ignore-not-found
+
 curl -L -s "${olmv1_manifest}" | sed "s/olmv1-system/${olmv1_namespace}/g" | kubectl apply -f -
 # Wait for the rollout, and then wait for the deployment to be Available
 kubectl_wait_rollout "${olmv1_namespace}" "deployment/catalogd-controller-manager" "60s"

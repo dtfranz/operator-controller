@@ -400,7 +400,7 @@ type ServiceAccountReference struct {
 	// [RFC 1123]: https://tools.ietf.org/html/rfc1123
 	//
 	// +kubebuilder:validation:MaxLength:=253
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="name is immutable"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf || size(self) == 0",message="name is immutable once set, but may be cleared"
 	// +kubebuilder:validation:XValidation:rule="size(self) == 0 || self.matches(\"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$\")",message="name must be a valid DNS1123 subdomain. It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.), start and end with an alphanumeric character, and be no longer than 253 characters"
 	// +optional
 	Name string `json:"name"`

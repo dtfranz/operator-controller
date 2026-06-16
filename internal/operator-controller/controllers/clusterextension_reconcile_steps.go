@@ -23,7 +23,6 @@ import (
 
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/finalizer"
@@ -99,7 +98,7 @@ func ValidateClusterExtension(validators ...ClusterExtensionValidator) Reconcile
 
 // ServiceAccountDeprecationWarning returns a validator that checks if the deprecated
 // serviceAccount field is populated and logs a warning if found.
-func ServiceAccountDeprecationWarning(saClient corev1client.ServiceAccountsGetter) ClusterExtensionValidator {
+func ServiceAccountDeprecationWarning() ClusterExtensionValidator {
 	return func(ctx context.Context, ext *ocv1.ClusterExtension) error {
 		l := log.FromContext(ctx)
 		if len(ext.Spec.ServiceAccount.Name) > 0 { //nolint:staticcheck // intentional read of deprecated field to emit deprecation warning
