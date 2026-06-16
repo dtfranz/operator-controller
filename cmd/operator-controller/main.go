@@ -41,7 +41,6 @@ import (
 	"k8s.io/client-go/discovery/cached/memory"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/ptr"
 	"pkg.package-operator.run/boxcutter/managedcache"
@@ -49,12 +48,15 @@ import (
 	crcache "sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/certwatcher"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	crfinalizer "sigs.k8s.io/controller-runtime/pkg/finalizer"
+	crhandler "sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	helmclient "github.com/operator-framework/helm-operator-plugins/pkg/client"
 
@@ -63,8 +65,6 @@ import (
 	"github.com/operator-framework/operator-controller/internal/operator-controller/applier"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/catalogmetadata/cache"
 	catalogclient "github.com/operator-framework/operator-controller/internal/operator-controller/catalogmetadata/client"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager"
-	cmcache "github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager/cache"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/controllers"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/features"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/finalizers"
@@ -118,6 +118,7 @@ type boxcutterReconcilerConfigurator struct {
 	imageCache            imageutil.Cache
 	imagePuller           imageutil.Puller
 	finalizers            crfinalizer.Finalizers
+	trackingCache         managedcache.TrackingCache
 }
 
 type helmReconcilerConfigurator struct {
@@ -128,7 +129,7 @@ type helmReconcilerConfigurator struct {
 	imageCache            imageutil.Cache
 	imagePuller           imageutil.Puller
 	finalizers            crfinalizer.Finalizers
-	watcher               cmcache.Watcher
+	trackingCache         managedcache.TrackingCache
 }
 
 const (
@@ -459,15 +460,40 @@ func run() error {
 		crdupgradesafety.NewPreflight(aeClient.CustomResourceDefinitions()),
 	}
 
+	trackingCache, err := managedcache.NewTrackingCache(
+		ctrl.Log.WithName("trackingCache"),
+		mgr.GetConfig(),
+		crcache.Options{
+			Scheme: mgr.GetScheme(), Mapper: mgr.GetRESTMapper(),
+		},
+	)
+	if err != nil {
+		setupLog.Error(err, "unable to create tracking cache")
+		return err
+	}
+	if err := mgr.Add(trackingCache); err != nil {
+		setupLog.Error(err, "unable to add tracking cache to manager")
+		return err
+	}
+
 	var ctrlBuilderOpts []controllers.ControllerBuilderOption
 	if features.OperatorControllerFeatureGate.Enabled(features.BoxcutterRuntime) {
 		ctrlBuilderOpts = append(ctrlBuilderOpts, controllers.WithOwns(&ocv1.ClusterObjectSet{}))
 	}
+	ctrlBuilderOpts = append(ctrlBuilderOpts, controllers.WithWatchesRawSource(
+		trackingCache.Source(
+			crhandler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &ocv1.ClusterExtension{}),
+			predicate.ResourceVersionChangedPredicate{},
+			predicate.Funcs{
+				CreateFunc: func(event.TypedCreateEvent[client.Object]) bool { return false },
+			},
+		),
+	))
 
 	ceReconciler := &controllers.ClusterExtensionReconciler{
 		Client: cl,
 	}
-	ceController, err := ceReconciler.SetupWithManager(mgr, ctrlBuilderOpts...)
+	_, err = ceReconciler.SetupWithManager(mgr, ctrlBuilderOpts...)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ClusterExtension")
 		return err
@@ -491,6 +517,7 @@ func run() error {
 			imageCache:            imageCache,
 			imagePuller:           imagePuller,
 			finalizers:            clusterExtensionFinalizers,
+			trackingCache:         trackingCache,
 		}
 	} else {
 		cerCfg = &helmReconcilerConfigurator{
@@ -501,7 +528,7 @@ func run() error {
 			imageCache:            imageCache,
 			imagePuller:           imagePuller,
 			finalizers:            clusterExtensionFinalizers,
-			watcher:               ceController,
+			trackingCache:         trackingCache,
 		}
 	}
 	if err := cerCfg.Configure(ceReconciler); err != nil {
@@ -642,23 +669,9 @@ func (c *boxcutterReconcilerConfigurator) Configure(ceReconciler *controllers.Cl
 	// Wrap the discovery client with caching to reduce memory usage from repeated OpenAPI schema fetches
 	discoveryClient := memory.NewMemCacheClient(baseDiscoveryClient)
 
-	trackingCache, err := managedcache.NewTrackingCache(
-		ctrl.Log.WithName("trackingCache"),
-		c.mgr.GetConfig(),
-		crcache.Options{
-			Scheme: c.mgr.GetScheme(), Mapper: c.mgr.GetRESTMapper(),
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("unable to create boxcutter tracking cache: %v", err)
-	}
-	if err := c.mgr.Add(trackingCache); err != nil {
-		return fmt.Errorf("unable to add tracking cache to manager: %v", err)
-	}
-
 	revisionEngineFactory, err := controllers.NewDefaultRevisionEngineFactory(
 		c.mgr.GetScheme(),
-		trackingCache,
+		c.trackingCache,
 		discoveryClient,
 		c.mgr.GetRESTMapper(),
 		fieldOwnerPrefix,
@@ -676,7 +689,7 @@ func (c *boxcutterReconcilerConfigurator) Configure(ceReconciler *controllers.Cl
 	if err = (&controllers.ClusterObjectSetReconciler{
 		Client:                cosClient,
 		RevisionEngineFactory: revisionEngineFactory,
-		TrackingCache:         trackingCache,
+		TrackingCache:         c.trackingCache,
 	}).SetupWithManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup ClusterObjectSet controller: %w", err)
 	}
@@ -688,17 +701,12 @@ func (c *helmReconcilerConfigurator) Configure(ceReconciler *controllers.Cluster
 	if err != nil {
 		return fmt.Errorf("unable to create core client: %w", err)
 	}
-	clientRestConfigMapper := func(_ context.Context, _ client.Object, _ *rest.Config) (*rest.Config, error) {
-		return rest.CopyConfig(c.mgr.GetConfig()), nil
-	}
-
 	cfgGetter, err := helmclient.NewActionConfigGetter(c.mgr.GetConfig(), c.mgr.GetRESTMapper(),
 		helmclient.StorageDriverMapper(action.ChunkedStorageDriverMapper(coreClient, c.mgr.GetAPIReader(), cfg.systemNamespace)),
 		helmclient.ClientNamespaceMapper(func(obj client.Object) (string, error) {
 			ext := obj.(*ocv1.ClusterExtension)
 			return ext.Spec.Namespace, nil
 		}),
-		helmclient.ClientRestConfigMapper(clientRestConfigMapper),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create helm action config getter: %w", err)
@@ -711,11 +719,8 @@ func (c *helmReconcilerConfigurator) Configure(ceReconciler *controllers.Cluster
 		return fmt.Errorf("unable to create helm action client getter: %w", err)
 	}
 
-	cm := contentmanager.NewManager(clientRestConfigMapper, c.mgr.GetConfig(), c.mgr.GetRESTMapper())
 	err = c.finalizers.Register(controllers.ClusterExtensionCleanupContentManagerCacheFinalizer, finalizers.FinalizerFunc(func(ctx context.Context, obj client.Object) (crfinalizer.Result, error) {
-		ext := obj.(*ocv1.ClusterExtension)
-		err := cm.Delete(ext)
-		return crfinalizer.Result{}, err
+		return crfinalizer.Result{}, c.trackingCache.Free(ctx, obj)
 	}))
 	if err != nil {
 		setupLog.Error(err, "unable to register content manager cleanup finalizer")
@@ -729,8 +734,7 @@ func (c *helmReconcilerConfigurator) Configure(ceReconciler *controllers.Cluster
 			ManifestProvider: c.regv1ManifestProvider,
 		},
 		HelmReleaseToObjectsConverter: &applier.HelmReleaseToObjectsConverter{},
-		Watcher:                       c.watcher,
-		Manager:                       cm,
+		TrackingCache:                 c.trackingCache,
 	}
 	revisionStatesGetter := &controllers.HelmRevisionStatesGetter{ActionClientGetter: acg}
 	ceReconciler.ReconcileSteps = []controllers.ReconcileStepFunc{

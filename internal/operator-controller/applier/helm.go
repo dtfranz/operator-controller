@@ -16,6 +16,8 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/sets"
 	apimachyaml "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,12 +25,15 @@ import (
 	helmclient "github.com/operator-framework/helm-operator-plugins/pkg/client"
 
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager/cache"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/features"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/rukpak/util"
 	imageutil "github.com/operator-framework/operator-controller/internal/shared/util/image"
 )
+
+type trackingCache interface {
+	Watch(ctx context.Context, user client.Object, gvks sets.Set[schema.GroupVersionKind]) error
+	Free(ctx context.Context, user client.Object) error
+}
 
 // HelmChartProvider provides helm charts from bundle sources and cluster extensions
 type HelmChartProvider interface {
@@ -60,8 +65,7 @@ type Helm struct {
 	HelmChartProvider             HelmChartProvider
 	HelmReleaseToObjectsConverter HelmReleaseToObjectsConverterInterface
 
-	Manager contentmanager.Manager
-	Watcher cache.Watcher
+	TrackingCache trackingCache
 }
 
 func (h *Helm) Apply(ctx context.Context, contentFS fs.FS, ext *ocv1.ClusterExtension, objectLabels map[string]string, storageLabels map[string]string) (bool, string, error) {
@@ -149,12 +153,8 @@ func (h *Helm) Apply(ctx context.Context, contentFS fs.FS, ext *ocv1.ClusterExte
 		return true, "", err
 	}
 	klog.FromContext(ctx).Info("watching managed objects")
-	cache, err := h.Manager.Get(ctx, ext)
-	if err != nil {
-		return true, "", err
-	}
-
-	if err := cache.Watch(ctx, h.Watcher, relObjects...); err != nil {
+	gvks := gvksForObjects(relObjects)
+	if err := h.TrackingCache.Watch(ctx, ext, gvks); err != nil {
 		return true, "", err
 	}
 
@@ -194,22 +194,12 @@ func (h *Helm) reconcileExistingRelease(ctx context.Context, ac helmclient.Actio
 
 	logger.V(1).Info("setting up drift detection watches on managed objects")
 
-	// Defensive nil checks to prevent panics if Manager or Watcher not properly initialized
-	if h.Manager == nil {
-		logger.Error(fmt.Errorf("manager is nil"), "Manager not initialized, cannot set up drift detection watches (resources are applied but drift detection disabled)")
+	if h.TrackingCache == nil {
+		logger.Error(fmt.Errorf("tracking cache is nil"), "TrackingCache not initialized, cannot set up drift detection watches (resources are applied but drift detection disabled)")
 		return true, "", nil
 	}
-	cache, err := h.Manager.Get(ctx, ext)
-	if err != nil {
-		logger.Error(err, "failed to get managed content cache, cannot set up drift detection watches (resources are applied but drift detection disabled)")
-		return true, "", nil
-	}
-
-	if h.Watcher == nil {
-		logger.Error(fmt.Errorf("watcher is nil"), "Watcher not initialized, cannot set up drift detection watches (resources are applied but drift detection disabled)")
-		return true, "", nil
-	}
-	if err := cache.Watch(ctx, h.Watcher, relObjects...); err != nil {
+	gvks := gvksForObjects(relObjects)
+	if err := h.TrackingCache.Watch(ctx, ext, gvks); err != nil {
 		logger.Error(err, "failed to set up drift detection watches (resources are applied but drift detection disabled)")
 		return true, "", nil
 	}
@@ -297,4 +287,12 @@ func (p *postrenderer) Run(renderedManifests *bytes.Buffer) (*bytes.Buffer, erro
 		return p.cascade.Run(&buf)
 	}
 	return &buf, nil
+}
+
+func gvksForObjects(objs []client.Object) sets.Set[schema.GroupVersionKind] {
+	gvks := sets.New[schema.GroupVersionKind]()
+	for _, obj := range objs {
+		gvks.Insert(obj.GetObjectKind().GroupVersionKind())
+	}
+	return gvks
 }

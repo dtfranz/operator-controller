@@ -14,52 +14,27 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	helmclient "github.com/operator-framework/helm-operator-plugins/pkg/client"
 
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/applier"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager"
-	cmcache "github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager/cache"
 )
 
-var _ contentmanager.Manager = (*mockManagedContentCacheManager)(nil)
-
-type mockManagedContentCacheManager struct {
-	err   error
-	cache cmcache.Cache
+type mockTrackingCache struct {
+	watchErr error
+	freeErr  error
 }
 
-func (m *mockManagedContentCacheManager) Get(_ context.Context, _ *ocv1.ClusterExtension) (cmcache.Cache, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return m.cache, nil
+func (m *mockTrackingCache) Watch(_ context.Context, _ client.Object, _ sets.Set[schema.GroupVersionKind]) error {
+	return m.watchErr
 }
 
-func (m *mockManagedContentCacheManager) Delete(_ *ocv1.ClusterExtension) error {
-	return m.err
-}
-
-type mockManagedContentCache struct {
-	err error
-}
-
-var _ cmcache.Cache = (*mockManagedContentCache)(nil)
-
-func (m *mockManagedContentCache) Close() error {
-	if m.err != nil {
-		return m.err
-	}
-	return nil
-}
-
-func (m *mockManagedContentCache) Watch(_ context.Context, _ cmcache.Watcher, _ ...client.Object) error {
-	if m.err != nil {
-		return m.err
-	}
-	return nil
+func (m *mockTrackingCache) Free(_ context.Context, _ client.Object) error {
+	return m.freeErr
 }
 
 type mockPreflight struct {
@@ -303,9 +278,7 @@ func TestApply_Installation(t *testing.T) {
 			ActionClientGetter:            mockAcg,
 			HelmChartProvider:             DummyHelmChartProvider,
 			HelmReleaseToObjectsConverter: mockHelmReleaseToObjectsConverter{},
-			Manager: &mockManagedContentCacheManager{
-				cache: &mockManagedContentCache{},
-			},
+			TrackingCache:                 &mockTrackingCache{},
 		}
 
 		installSucceeded, installStatus, err := helmApplier.Apply(context.TODO(), validFS, testCE, testObjectLabels, testStorageLabels)
@@ -419,9 +392,7 @@ func TestApply_Upgrade(t *testing.T) {
 			ActionClientGetter:            mockAcg,
 			HelmChartProvider:             DummyHelmChartProvider,
 			HelmReleaseToObjectsConverter: mockHelmReleaseToObjectsConverter{},
-			Manager: &mockManagedContentCacheManager{
-				cache: &mockManagedContentCache{},
-			},
+			TrackingCache:                 &mockTrackingCache{},
 		}
 
 		installSucceeded, installStatus, err := helmApplier.Apply(context.TODO(), validFS, testCE, testObjectLabels, testStorageLabels)
@@ -448,9 +419,7 @@ func TestApply_RegistryV1ToChartConverterIntegration(t *testing.T) {
 				},
 			},
 			HelmReleaseToObjectsConverter: mockHelmReleaseToObjectsConverter{},
-			Manager: &mockManagedContentCacheManager{
-				cache: &mockManagedContentCache{},
-			},
+			TrackingCache:                 &mockTrackingCache{},
 		}
 
 		_, _, _ = helmApplier.Apply(context.TODO(), validFS, testCE, testObjectLabels, testStorageLabels)
@@ -470,9 +439,7 @@ func TestApply_RegistryV1ToChartConverterIntegration(t *testing.T) {
 					return nil, errors.New("some error")
 				},
 			},
-			Manager: &mockManagedContentCacheManager{
-				cache: &mockManagedContentCache{},
-			},
+			TrackingCache: &mockTrackingCache{},
 		}
 
 		_, _, err := helmApplier.Apply(context.TODO(), validFS, testCE, testObjectLabels, testStorageLabels)

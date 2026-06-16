@@ -69,12 +69,12 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 5 — Global shared cache refactor (after stream 4)
 
-- [ ] Refactor `contentmanager/` from per-CE caches to single global cache — **OPRUN-4633**
-- [ ] Remove `createScopedClient` from `revision_engine_factory.go` — **OPRUN-4633**
-- [ ] Simplify `RestConfigMapper` pattern — **OPRUN-4633**
-- [ ] Refactor Boxcutter to shared client (if applicable) — **OPRUN-4633**
-- [ ] Verify no regression in drift detection / managed content watching — **OPRUN-4633**
-- [ ] Update unit + e2e tests — **OPRUN-4633**
+- [X] Refactor `contentmanager/` from per-CE caches to single global cache — **OPRUN-4633**
+- [X] Remove `createScopedClient` from `revision_engine_factory.go` — **OPRUN-4633** `61b62e78` (Daniel)
+- [X] Simplify `RestConfigMapper` pattern — **OPRUN-4633**
+- [X] Refactor Boxcutter to shared client (if applicable) — **OPRUN-4633** `61b62e78` (Daniel)
+- [X] Verify no regression in drift detection / managed content watching — **OPRUN-4633**
+- [X] Update unit + e2e tests — **OPRUN-4633**
 
 > **Ticket close gate:** OPRUN-4633 closable when all stream 5 items are done
 
