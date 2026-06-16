@@ -60,7 +60,6 @@ import (
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/action"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/applier"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/authentication"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/catalogmetadata/cache"
 	catalogclient "github.com/operator-framework/operator-controller/internal/operator-controller/catalogmetadata/client"
 	"github.com/operator-framework/operator-controller/internal/operator-controller/contentmanager"
@@ -656,12 +655,6 @@ func (c *boxcutterReconcilerConfigurator) Configure(ceReconciler *controllers.Cl
 		return fmt.Errorf("unable to add tracking cache to manager: %v", err)
 	}
 
-	cerCoreClient, err := corev1client.NewForConfig(c.mgr.GetConfig())
-	if err != nil {
-		return fmt.Errorf("unable to create client for ClusterObjectSet controller: %w", err)
-	}
-	cerTokenGetter := authentication.NewTokenGetter(cerCoreClient, authentication.WithExpirationDuration(1*time.Hour))
-
 	revisionEngineFactory, err := controllers.NewDefaultRevisionEngineFactory(
 		c.mgr.GetScheme(),
 		trackingCache,
@@ -669,7 +662,6 @@ func (c *boxcutterReconcilerConfigurator) Configure(ceReconciler *controllers.Cl
 		c.mgr.GetRESTMapper(),
 		fieldOwnerPrefix,
 		c.mgr.GetConfig(),
-		cerTokenGetter,
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create revision engine factory: %w", err)
@@ -695,11 +687,7 @@ func (c *helmReconcilerConfigurator) Configure(ceReconciler *controllers.Cluster
 	if err != nil {
 		return fmt.Errorf("unable to create core client: %w", err)
 	}
-	tokenGetter := authentication.NewTokenGetter(coreClient, authentication.WithExpirationDuration(1*time.Hour))
-	clientRestConfigMapper := action.ServiceAccountRestConfigMapper(tokenGetter)
-	if features.OperatorControllerFeatureGate.Enabled(features.SyntheticPermissions) {
-		clientRestConfigMapper = action.SyntheticUserRestConfigMapper(clientRestConfigMapper)
-	}
+	clientRestConfigMapper := action.ClusterAdminRestConfigMapper(c.mgr.GetConfig())
 
 	cfgGetter, err := helmclient.NewActionConfigGetter(c.mgr.GetConfig(), c.mgr.GetRESTMapper(),
 		helmclient.StorageDriverMapper(action.ChunkedStorageDriverMapper(coreClient, c.mgr.GetAPIReader(), cfg.systemNamespace)),

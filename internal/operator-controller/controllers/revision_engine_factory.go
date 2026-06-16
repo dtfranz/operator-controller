@@ -10,11 +10,9 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"pkg.package-operator.run/boxcutter/machinery"
@@ -24,7 +22,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ocv1 "github.com/operator-framework/operator-controller/api/v1"
-	"github.com/operator-framework/operator-controller/internal/operator-controller/authentication"
 )
 
 // RevisionEngine defines the interface for reconciling and tearing down revisions.
@@ -38,7 +35,7 @@ type RevisionEngineFactory interface {
 	CreateRevisionEngine(ctx context.Context, rev *ocv1.ClusterObjectSet) (RevisionEngine, error)
 }
 
-// defaultRevisionEngineFactory creates boxcutter RevisionEngines with serviceAccount-scoped clients.
+// defaultRevisionEngineFactory creates boxcutter RevisionEngines.
 type defaultRevisionEngineFactory struct {
 	Scheme           *runtime.Scheme
 	TrackingCache    managedcache.TrackingCache
@@ -46,64 +43,28 @@ type defaultRevisionEngineFactory struct {
 	RESTMapper       meta.RESTMapper
 	FieldOwnerPrefix string
 	BaseConfig       *rest.Config
-	TokenGetter      *authentication.TokenGetter
 }
 
 // CreateRevisionEngine constructs a boxcutter RevisionEngine for the given ClusterObjectSet.
-// It reads the ServiceAccount from annotations and creates a scoped client.
 func (f *defaultRevisionEngineFactory) CreateRevisionEngine(_ context.Context, rev *ocv1.ClusterObjectSet) (RevisionEngine, error) {
-	saNamespace, saName, err := f.getServiceAccount(rev)
+	client, err := client.New(f.BaseConfig, client.Options{
+		Scheme: f.Scheme,
+	})
 	if err != nil {
-		return nil, err
-	}
-
-	scopedClient, err := f.createScopedClient(saNamespace, saName)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
 	return machinery.NewRevisionEngine(
 		machinery.NewPhaseEngine(
 			machinery.NewObjectEngine(
-				f.Scheme, f.TrackingCache, scopedClient,
+				f.Scheme, f.TrackingCache, client,
 				machinery.NewComparator(f.DiscoveryClient, f.Scheme, f.FieldOwnerPrefix),
-				f.FieldOwnerPrefix, f.FieldOwnerPrefix, scopedClient,
+				f.FieldOwnerPrefix, f.FieldOwnerPrefix, client,
 			),
-			validation.NewClusterPhaseValidator(f.RESTMapper, scopedClient),
+			validation.NewClusterPhaseValidator(f.RESTMapper, client),
 		),
-		validation.NewRevisionValidator(), scopedClient,
+		validation.NewRevisionValidator(), client,
 	), nil
-}
-
-func (f *defaultRevisionEngineFactory) getServiceAccount(rev *ocv1.ClusterObjectSet) (string, string, error) {
-	// TODO stubbed until the revision engine is removed
-	saName := "operator-controller-controller-manager"
-	saNamespace := "olmv1-system"
-
-	return saNamespace, saName, nil
-}
-
-func (f *defaultRevisionEngineFactory) createScopedClient(namespace, serviceAccountName string) (client.Client, error) {
-	saConfig := rest.AnonymousClientConfig(f.BaseConfig)
-	saConfig.Wrap(func(rt http.RoundTripper) http.RoundTripper {
-		return &authentication.TokenInjectingRoundTripper{
-			Tripper:     rt,
-			TokenGetter: f.TokenGetter,
-			Key: types.NamespacedName{
-				Name:      serviceAccountName,
-				Namespace: namespace,
-			},
-		}
-	})
-
-	scopedClient, err := client.New(saConfig, client.Options{
-		Scheme: f.Scheme,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create client for ServiceAccount %s/%s: %w", namespace, serviceAccountName, err)
-	}
-
-	return scopedClient, nil
 }
 
 // NewDefaultRevisionEngineFactory creates a new defaultRevisionEngineFactory.
@@ -114,13 +75,9 @@ func NewDefaultRevisionEngineFactory(
 	restMapper meta.RESTMapper,
 	fieldOwnerPrefix string,
 	baseConfig *rest.Config,
-	tokenGetter *authentication.TokenGetter,
 ) (RevisionEngineFactory, error) {
 	if baseConfig == nil {
 		return nil, fmt.Errorf("baseConfig is required but not provided")
-	}
-	if tokenGetter == nil {
-		return nil, fmt.Errorf("tokenGetter is required but not provided")
 	}
 	return &defaultRevisionEngineFactory{
 		Scheme:           scheme,
@@ -129,6 +86,5 @@ func NewDefaultRevisionEngineFactory(
 		RESTMapper:       restMapper,
 		FieldOwnerPrefix: fieldOwnerPrefix,
 		BaseConfig:       baseConfig,
-		TokenGetter:      tokenGetter,
 	}, nil
 }

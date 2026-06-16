@@ -35,11 +35,11 @@ Anyone:      Stream 6 (docs) ← after 4
 
 ### Stream 2 — Authentication + Action + Labels (Engineer B, no blockers)
 
-- [ ] Remove `TokenGetter` (`authentication/tokengetter.go`) — **OPRUN-4630**
-- [ ] Remove `TokenInjectingRoundTripper` (`authentication/tripper.go`) — **OPRUN-4630**
-- [ ] Remove `authentication/synthetic.go` + tests — **OPRUN-4632**
-- [ ] Remove `ServiceAccountRestConfigMapper` from `action/restconfig.go` — **OPRUN-4630**
-- [ ] Remove `SyntheticUserRestConfigMapper` from `action/restconfig.go` + tests — **OPRUN-4632**
+- [X] Remove `TokenGetter` (`authentication/tokengetter.go`) — **OPRUN-4630**
+- [X] Remove `TokenInjectingRoundTripper` (`authentication/tripper.go`) — **OPRUN-4630**
+- [X] Remove `authentication/synthetic.go` + tests — **OPRUN-4632**
+- [X] Remove `ServiceAccountRestConfigMapper` from `action/restconfig.go` — **OPRUN-4630**
+- [X] Remove `SyntheticUserRestConfigMapper` from `action/restconfig.go` + tests — **OPRUN-4632**
 - [X] Remove SA annotations (`ServiceAccountNameKey`, `ServiceAccountNamespaceKey`) from `labels/labels.go` — **OPRUN-4630** `7f5a6843`
 
 ### Stream 3 — Authorization + Build tooling (Engineer C, no blockers)
@@ -57,7 +57,7 @@ Anyone:      Stream 6 (docs) ← after 4
 - [X] Remove pre-auth checks from Helm applier — **OPRUN-4631** N/A (PreAuthorizer removed in `9791b717`)
 - [X] Remove pre-auth checks from Boxcutter applier — **OPRUN-4631** N/A (PreAuthorizer removed in `9791b717`)
 - [X] Remove `PreflightPermissions` feature gate from `features.go` — **OPRUN-4631** `e1b7d2f1`
-- [ ] Remove `SyntheticPermissions` feature gate from `features.go` — **OPRUN-4632**
+- [X] Remove `SyntheticPermissions` feature gate from `features.go` — **OPRUN-4632**
 - [X] Clean up RBAC watches if only needed for pre-auth — **OPRUN-4631** N/A (RBAC watches serve Boxcutter phase ordering)
 - [X] Rewire `main.go`: remove all SA/synthetic/preflight wiring, always use controller's own SA — **OPRUN-4630** `7f5a6843`
 - [ ] Update all unit + e2e tests — **OPRUN-4630, OPRUN-4631, OPRUN-4632**
