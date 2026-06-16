@@ -41,6 +41,7 @@ import (
 	"k8s.io/client-go/discovery/cached/memory"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/ptr"
 	"pkg.package-operator.run/boxcutter/managedcache"
@@ -687,7 +688,9 @@ func (c *helmReconcilerConfigurator) Configure(ceReconciler *controllers.Cluster
 	if err != nil {
 		return fmt.Errorf("unable to create core client: %w", err)
 	}
-	clientRestConfigMapper := action.ClusterAdminRestConfigMapper(c.mgr.GetConfig())
+	clientRestConfigMapper := func(_ context.Context, _ client.Object, _ *rest.Config) (*rest.Config, error) {
+		return rest.CopyConfig(c.mgr.GetConfig()), nil
+	}
 
 	cfgGetter, err := helmclient.NewActionConfigGetter(c.mgr.GetConfig(), c.mgr.GetRESTMapper(),
 		helmclient.StorageDriverMapper(action.ChunkedStorageDriverMapper(coreClient, c.mgr.GetAPIReader(), cfg.systemNamespace)),
