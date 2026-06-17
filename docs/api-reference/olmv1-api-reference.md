@@ -298,7 +298,7 @@ _Appears in:_
 
 
 ClusterExtensionInstallConfig is a union which selects the clusterExtension installation config.
-ClusterExtensionInstallConfig requires the namespace and serviceAccount which should be used for the installation of packages.
+ClusterExtensionInstallConfig requires the namespace which should be used for the installation of packages.
 
 
 

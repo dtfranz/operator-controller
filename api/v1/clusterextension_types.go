@@ -148,7 +148,7 @@ type SourceConfig struct {
 }
 
 // ClusterExtensionInstallConfig is a union which selects the clusterExtension installation config.
-// ClusterExtensionInstallConfig requires the namespace and serviceAccount which should be used for the installation of packages.
+// ClusterExtensionInstallConfig requires the namespace which should be used for the installation of packages.
 //
 // +kubebuilder:validation:XValidation:rule="has(self.preflight)",message="at least one of [preflight] are required when install is specified"
 // +union
