@@ -1,0 +1,2326 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>ClusterObjectSet Ready Condition Implementation Plan - Operator Lifecycle Manager</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/extra.css">
+    
+      <link rel="stylesheet" href="../../../css/terminal-player.css">
+    
+      <link rel="stylesheet" href="../../../css/asciinema-player.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clusterobjectset-ready-condition-implementation-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-header__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Operator Lifecycle Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ClusterObjectSet Ready Condition Implementation Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-nav__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Operator Lifecycle Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_design_decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/public-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/olmv1_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/add-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/explore-available-content/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explore Content
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/install-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/upgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/downgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/uninstall-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uninstall an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/catalog-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog queries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-channel-based-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel-Based Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-pin-version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-version-range-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Range Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-z-stream-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Z-Stream Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-grant-api-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grant Access to Your Extension's API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conceptual Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conceptual Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/single-owner-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Single Owner Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/upgrade-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/crd-upgrade-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRD Upgrade Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/controlling-catalog-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Content Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/version-ranges/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Ranges
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/olmv1-api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OLMv1 API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/catalogd-webserver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CatalogD Web Server reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/developer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing OLM v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Focus
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Review Focus">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-1-rename-the-cos-condition-type-available-ready-keeping-the-ces-available-condition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 1: Rename the COS condition type Available → Ready, keeping the CE's Available condition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-2-add-the-new-reason-constants-additive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 2: Add the new reason constants (additive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-3-rewire-the-cos-controller-writer-to-the-new-reasons-and-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 3: Rewire the COS controller writer to the new reasons and messages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Task 3: Rewire the COS controller writer to the new reasons and messages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-rework-the-setters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3a. Rework the setters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-rework-the-blocked-class-checks-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3b. Rework the blocked-class checks (messages)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-rewire-the-reconcile-call-sites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3c. Rewire the reconcile call sites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-update-the-controller-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3d. Update the controller tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-4-update-the-clusterextension-roll-up-reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 4: Update the ClusterExtension roll-up reader
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-5-remove-obsolete-reason-constants-and-rewrite-the-status-doc-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 5: Remove obsolete reason constants and rewrite the status doc block
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-6-regenerate-crd-manifests-and-api-reference-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 6: Regenerate CRD, manifests, and API reference; verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-carried-from-the-spec-deferred-out-of-scope-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes carried from the spec (deferred — out of scope here)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="clusterobjectset-ready-condition-implementation-plan">ClusterObjectSet <code>Ready</code> Condition Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Rename the <code>ClusterObjectSet</code> (COS) health condition from <code>Available</code> to <code>Ready</code> and replace its overloaded reason set with specific, actionable reasons, without changing the ClusterExtension-visible roll-up behavior.</p>
+<p><strong>Architecture:</strong> COS is experimental-only. The COS controller (<code>internal/object-controller/controllers/clusterobjectset_controller.go</code>) is the sole writer of the condition; <code>common_controller.go</code> in the operator-controller package is the sole reader, reconstructing the ClusterExtension <code>Progressing</code>/<code>Installed</code> conditions from it. We rename the condition type, split the catch-all <code>Reconciling</code>/<code>Blocked</code> reasons into specific ones, merge <code>RollingOut</code>+<code>ProbeFailure</code> into a single readiness reason, drop bundle-version/"revision" verbiage from messages, then regenerate the experimental CRD, manifests, and API reference docs.</p>
+<p><strong>Tech Stack:</strong> Go, controller-runtime, boxcutter (<code>pkg.package-operator.run/boxcutter v0.14.0</code>), gomock, testify, kubebuilder markers (controller-gen), bingo-managed tooling.</p>
+<p><strong>Spec:</strong> <code>docs/superpowers/specs/2026-09-30-cos-ready-condition-blueprint.md</code> — the plan implements that blueprint; executors read both.</p>
+<h2 id="global-constraints">Global Constraints</h2>
+<ul>
+<li><strong>Experimental-only API.</strong> COS has no standard-channel CRD. The controller file carries <code>//go:build !standard</code>. No compatibility gate blocks the rename; there is no standard manifest/CRD to update.</li>
+<li><strong>API group / label prefix:</strong> <code>olm.operatorframework.io</code> for all reasons, labels, annotations.</li>
+<li><strong>Reason values are CamelCase</strong> machine identifiers; <strong>messages are complete sentences</strong>, capitalized, ending with a period (OpenShift convention). Avoid raw <code>err.Error()</code> jargon except in the transient <code>Reconciling</code> catch-all.</li>
+<li><strong>No bundle version, no "revision" verbiage in COS messages.</strong> Bundle version is a ClusterExtension concept; COS self-describes as "the object set"; per-object messages say "object(s)".</li>
+<li><strong>Determinism:</strong> any list interpolated into a message (secret names, phase names, per-object detail) must be sorted so the message does not churn across reconciles.</li>
+<li><strong>Generated files are committed.</strong> After API-marker/doc changes, regenerate with the project's make targets (bingo-managed tools) and commit the output. Never hand-edit generated CRD YAML, <code>manifests/*.yaml</code>, or <code>docs/api-reference/olmv1-api-reference.md</code>.</li>
+<li><strong>Do not touch</strong> <code>internal/operator-controller/applier/boxcutter.go</code> <code>availableConditionAssertion</code> — it asserts a managed <strong>Deployment's</strong> <code>Available</code> condition (<code>appsv1.DeploymentAvailable</code>), unrelated to the COS condition.</li>
+<li><strong>Commits:</strong> DCO sign-off (<code>git commit -s</code>). If opening a PR, title prefix <code>✨</code> (minor/compatible change). End commit messages with <code>Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;</code>.</li>
+</ul>
+<h2 id="review-focus">Review Focus</h2>
+<ul>
+<li><strong>CE condition type stays <code>Available</code>.</strong> The ClusterExtension's public contract exposes a condition named <code>Available</code> (both the top-level roll-up and each <code>status.activeRevisions[].conditions[]</code> entry — <code>clusterextension_types.go:522</code>). The reader currently copies the COS condition <strong>verbatim, including <code>.Type</code></strong> (<code>common_controller.go:84</code>, <code>:97</code>), so a naive constant rename would silently flip the CE's condition to <code>Ready</code>. The reader must be decoupled: look up the COS <code>Ready</code> condition but re-emit onto the CE as <code>Available</code>. → Task 1 tests assert the CE emits type <code>Available</code>.</li>
+<li><strong>ClusterExtension roll-up equivalence.</strong> The resplit must preserve the CE <code>Progressing</code>/<code>Installed</code> <strong>reasons</strong> (messages are allowed to change — they flow through from the reworded COS messages via <code>progressingFromAvailable</code> at <code>common_controller.go:248</code>, and that is intended): <code>ValidationFailed</code>/<code>ObjectCollision</code> must roll up like the old <code>Reconciling</code> (CE <code>Progressing=Retrying</code>, <code>Installed</code> failure reason <code>Failed</code>); <code>MutableReferencedSecret</code>/<code>DigestMismatch</code> must roll up like the old <code>Blocked</code> (CE <code>Progressing=False/Blocked</code>). → Task 4 tests.</li>
+<li><strong>Deadline precedence vs. blocked.</strong> Blocked-class reasons (<code>MutableReferencedSecret</code>, <code>DigestMismatch</code>) must NOT be overridden by <code>ProgressDeadlineExceeded</code>; <code>ObjectsNotReady</code>/<code>ValidationFailed</code>/<code>ObjectCollision</code>/<code>Reconciling</code> MUST remain deadline-overridable. → Task 3 tests.</li>
+<li><strong>Empty per-object detail.</strong> When the revision is not complete but no per-object probe detail is available yet, <code>ObjectsNotReady</code> must emit the generic <code>Objects are not yet ready.</code>, never <code>0 object(s) are not yet ready:</code>. → Task 3 test.</li>
+<li><strong>completedAt stamped once.</strong> <code>status.completedAt</code> must still be stamped exactly once, on first <code>AllObjectsReady</code>, and never cleared/re-set. → Task 3 test.</li>
+<li><strong>Message hygiene / determinism.</strong> <code>DigestMismatch</code> must not leak raw digests; <code>MutableReferencedSecret</code> and <code>DigestMismatch</code> must list names sorted. → Task 3 tests.</li>
+</ul>
+<hr />
+<h3 id="task-1-rename-the-cos-condition-type-available-ready-keeping-the-ces-available-condition">Task 1: Rename the COS condition type <code>Available</code> → <code>Ready</code>, keeping the CE's <code>Available</code> condition</h3>
+<p>Rename the <strong>ClusterObjectSet</strong> condition type to <code>Ready</code>, but <strong>decouple the ClusterExtension reader</strong> so the CE keeps publishing a condition literally named <code>Available</code>. The reader looks up the COS <code>Ready</code> condition and re-emits it onto the CE (top-level and per-revision) as <code>Available</code>. No reason changes here. The tree must compile and all unit tests pass at the end, and the CE must still emit type <code>Available</code>.</p>
+<p><strong>Files:</strong>
+- Modify: <code>api/v1/clusterobjectset_types.go:29</code> (constant), <code>:563</code> (printcolumn)
+- Modify: <code>api/v1/common_types.go:20-21</code> (add CE-owned <code>TypeAvailable</code>)
+- Modify: <code>internal/object-controller/controllers/clusterobjectset_controller.go</code> (<code>:665</code>, <code>:679</code>, <code>:689</code> — the three writer <code>Type:</code> fields)
+- Modify: <code>internal/operator-controller/controllers/common_controller.go</code> (lookups <code>:80</code>, <code>:93</code>, <code>:112</code>, <code>:115</code>, <code>:152</code>; emission overrides <code>:84</code>, <code>:97</code>)
+- Test: <code>internal/object-controller/controllers/clusterobjectset_controller_test.go</code> (all <code>ocv1.ClusterObjectSetTypeAvailable</code> uses → <code>ClusterObjectSetTypeReady</code>)
+- Test: <code>internal/operator-controller/controllers/common_controller_test.go</code> (revision-condition <strong>fixtures</strong> → <code>ClusterObjectSetTypeReady</code>; add CE-emission assertions)</p>
+<p><strong>Interfaces:</strong>
+- Produces: <code>ocv1.ClusterObjectSetTypeReady = "Ready"</code> (replaces <code>ClusterObjectSetTypeAvailable</code>) — the COS writer's condition type.
+- Produces: <code>ocv1.TypeAvailable = "Available"</code> (new, in <code>common_types.go</code>) — the CE-owned condition type the reader emits. Consumed by Task 4 tests.
+- Rule established here: the COS <strong>writes</strong> <code>Ready</code>; the CE <strong>reads</strong> <code>Ready</code> from revisions but <strong>emits</strong> <code>Available</code>. Later tasks preserve this split.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Rename the COS condition-type constant and its value</strong></li>
+</ul>
+<p>In <code>api/v1/clusterobjectset_types.go</code>, change line 29:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="c1">// Condition Types</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nx">ClusterObjectSetTypeReady</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Ready"</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Add the CE-owned <code>TypeAvailable</code> constant</strong></li>
+</ul>
+<p>In <code>api/v1/common_types.go</code>, add alongside <code>TypeInstalled</code>/<code>TypeProgressing</code> (lines 20-21):</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">    </span><span class="nx">TypeInstalled</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s">"Installed"</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">TypeProgressing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Progressing"</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="c1">// TypeAvailable is the ClusterExtension condition that surfaces the health of the</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="c1">// active revision's object set. It is published by the operator-controller reader</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="c1">// (decoupled from the ClusterObjectSet's own Ready condition) so the ClusterExtension</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="c1">// contract stays stable across the ClusterObjectSet/ClusterObjectDeployment layering.</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nx">TypeAvailable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Available"</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Update the printcolumn marker</strong></li>
+</ul>
+<p>In <code>api/v1/clusterobjectset_types.go</code> replace the printcolumn at <code>:563</code>:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=='Ready')].status`</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Update the COS writer's condition type</strong></li>
+</ul>
+<p>In <code>clusterobjectset_controller.go</code>, replace every <code>ocv1.ClusterObjectSetTypeAvailable</code> with <code>ocv1.ClusterObjectSetTypeReady</code> (the three <code>Type:</code> fields at <code>:665</code>, <code>:679</code>, <code>:689</code>). Run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>grep<span class="w"> </span>-n<span class="w"> </span>ClusterObjectSetTypeAvailable<span class="w"> </span>internal/object-controller/controllers/clusterobjectset_controller.go
+</span></code></pre></div>
+<p>Expected after edit: no matches.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Decouple the CE reader — look up <code>Ready</code>, emit <code>Available</code></strong></li>
+</ul>
+<p>In <code>common_controller.go</code>:</p>
+<p>Change the three <strong>lookups</strong> to read the COS <code>Ready</code> condition — <code>:80</code>, <code>:93</code>, <code>:112</code>, <code>:115</code>, <code>:152</code> — e.g.:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="w">    </span><span class="nx">avail</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">apimeta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Then at the two <strong>emission</strong> sites override the copied condition's type to the CE-owned <code>Available</code> before setting it. In <code>setActiveRevisionsFromRevisionStates</code> (<code>:80-85</code>):</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="w">        </span><span class="nx">avail</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">apimeta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">)</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">avail</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">            </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">*</span><span class="nx">avail</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">            </span><span class="nx">a</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">TypeAvailable</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">            </span><span class="nx">a</span><span class="p">.</span><span class="nx">ObservedGeneration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ext</span><span class="p">.</span><span class="nx">GetGeneration</span><span class="p">()</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">            </span><span class="nx">apimeta</span><span class="p">.</span><span class="nx">SetStatusCondition</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">rs</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">)</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="p">}</span>
+</span></code></pre></div>
+<p>And in <code>setAvailableFromRevisionStates</code> (<code>:93-98</code>):</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="w">        </span><span class="nx">avail</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">apimeta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">avail</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">            </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">*</span><span class="nx">avail</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">            </span><span class="nx">a</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">TypeAvailable</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">            </span><span class="nx">a</span><span class="p">.</span><span class="nx">ObservedGeneration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ext</span><span class="p">.</span><span class="nx">GetGeneration</span><span class="p">()</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">            </span><span class="nx">apimeta</span><span class="p">.</span><span class="nx">SetStatusCondition</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">ext</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">        </span><span class="p">}</span>
+</span></code></pre></div>
+<p>Verify no stray references remain:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>grep<span class="w"> </span>-n<span class="w"> </span>ClusterObjectSetTypeAvailable<span class="w"> </span>internal/operator-controller/controllers/common_controller.go
+</span></code></pre></div>
+<p>Expected: no matches.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Flip the reader test fixtures to <code>Ready</code>, keep CE assertions on <code>Available</code></strong></li>
+</ul>
+<p>In <code>common_controller_test.go</code>, the revision-condition <strong>fixtures</strong> represent the COS condition the reader consumes, so replace <code>ocv1.ClusterObjectSetTypeAvailable</code> with <code>ocv1.ClusterObjectSetTypeReady</code> in every fixture (<code>:328</code>, <code>:352</code>, <code>:363</code>, <code>:387</code>, <code>:411</code>, <code>:422</code>, the <code>availCond</code> helper <code>:460</code>, and the <code>TestProgressingFromAvailable</code> cases <code>:507</code>, <code>:519</code>, <code>:525</code>, <code>:531</code>, <code>:537</code>). Run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>grep<span class="w"> </span>-n<span class="w"> </span>ClusterObjectSetTypeAvailable<span class="w"> </span>internal/operator-controller/controllers/common_controller_test.go
+</span></code></pre></div>
+<p>Expected: no matches.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 7: Add a test asserting the CE emits type <code>Available</code> (not <code>Ready</code>)</strong></li>
+</ul>
+<p>Add a focused test next to the existing reader tests:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">TestCEEmitsAvailableConditionType</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nx">ext</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterExtension</span><span class="p">{</span><span class="nx">ObjectMeta</span><span class="p">:</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ObjectMeta</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"test-ext"</span><span class="p">,</span><span class="w"> </span><span class="nx">Generation</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}}</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nx">states</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RevisionStates</span><span class="p">{</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">        </span><span class="nx">Installed</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RevisionMetadata</span><span class="p">{</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">            </span><span class="nx">RevisionName</span><span class="p">:</span><span class="w"> </span><span class="s">"rev-1"</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">            </span><span class="nx">Conditions</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">metav1</span><span class="p">.</span><span class="nx">Condition</span><span class="p">{{</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">                </span><span class="nx">Type</span><span class="p">:</span><span class="w">   </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">                </span><span class="nx">Status</span><span class="p">:</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionTrue</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">                </span><span class="nx">Reason</span><span class="p">:</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonProbesSucceeded</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">            </span><span class="p">}},</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nx">setAvailableFromRevisionStates</span><span class="p">(</span><span class="nx">ext</span><span class="p">,</span><span class="w"> </span><span class="nx">states</span><span class="p">)</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">    </span><span class="nx">require</span><span class="p">.</span><span class="nx">NotNil</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">meta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">ext</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">TypeAvailable</span><span class="p">),</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">        </span><span class="s">"CE must expose an Available condition"</span><span class="p">)</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="nx">require</span><span class="p">.</span><span class="nx">Nil</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">meta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">ext</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">),</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">        </span><span class="s">"CE must not expose the COS Ready condition type directly"</span><span class="p">)</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>(Uses <code>ClusterObjectSetReasonProbesSucceeded</code>, which still exists until Task 5; Task 4 updates it to <code>AllObjectsReady</code>.)</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 8: Build and test</strong></li>
+</ul>
+<p>Run: <code>go build ./... &amp;&amp; go test ./internal/object-controller/... ./internal/operator-controller/... ./api/...</code>
+Expected: PASS. CE behavior is preserved (still emits <code>Available</code>); only the COS condition type changed to <code>Ready</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 9: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git<span class="w"> </span>add<span class="w"> </span>-A
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"rename ClusterObjectSet condition to Ready; keep ClusterExtension Available</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h3 id="task-2-add-the-new-reason-constants-additive">Task 2: Add the new reason constants (additive)</h3>
+<p>Purely additive — introduce the new reason identifiers alongside the existing ones so later tasks can reference them while the tree stays green.</p>
+<p><strong>Files:</strong>
+- Modify: <code>api/v1/clusterobjectset_types.go:31-38</code> (reason block)</p>
+<p><strong>Interfaces:</strong>
+- Produces these new constants (consumed by Tasks 3 and 4):
+  - <code>ClusterObjectSetReasonAllObjectsReady = "AllObjectsReady"</code>
+  - <code>ClusterObjectSetReasonObjectsNotReady = "ObjectsNotReady"</code>
+  - <code>ClusterObjectSetReasonValidationFailed = "ValidationFailed"</code>
+  - <code>ClusterObjectSetReasonObjectCollision = "ObjectCollision"</code>
+  - <code>ClusterObjectSetReasonMutableReferencedSecret = "MutableReferencedSecret"</code>
+  - <code>ClusterObjectSetReasonDigestMismatch = "DigestMismatch"</code>
+  - <code>ClusterObjectSetReasonArchiving = "Archiving"</code>
+- Keeps: <code>ClusterObjectSetReasonReconciling</code>, <code>ClusterObjectSetReasonArchived</code>.
+- Still present (removed in Task 5): <code>ClusterObjectSetReasonProbesSucceeded</code>, <code>ClusterObjectSetReasonProbeFailure</code>, <code>ClusterObjectSetReasonBlocked</code>, <code>ClusterObjectSetReasonRetrying</code>.
+- <code>ProgressDeadlineExceeded</code> continues to come from <code>api/v1/common_types.go</code> as <code>ocv1.ReasonProgressDeadlineExceeded</code> (shared; unchanged).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Add the constants</strong></li>
+</ul>
+<p>In <code>api/v1/clusterobjectset_types.go</code>, replace the reason block (lines 31-38) with:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="w">    </span><span class="c1">// Condition Reasons</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonArchived</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">"Archived"</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonArchiving</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Archiving"</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonAllObjectsReady</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s">"AllObjectsReady"</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonObjectsNotReady</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s">"ObjectsNotReady"</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonValidationFailed</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s">"ValidationFailed"</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonObjectCollision</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s">"ObjectCollision"</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonMutableReferencedSecret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"MutableReferencedSecret"</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonDigestMismatch</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="s">"DigestMismatch"</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonReconciling</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="s">"Reconciling"</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="c1">// Deprecated: removed after the Ready-condition rework; retained only until</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="c1">// all references are migrated.</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonBlocked</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s">"Blocked"</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonProbeFailure</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s">"ProbeFailure"</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonProbesSucceeded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"ProbesSucceeded"</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">    </span><span class="nx">ClusterObjectSetReasonRetrying</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s">"Retrying"</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Build</strong></li>
+</ul>
+<p>Run: <code>go build ./... &amp;&amp; go vet ./api/...</code>
+Expected: PASS (nothing references the new constants yet; no removals).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>git<span class="w"> </span>add<span class="w"> </span>api/v1/clusterobjectset_types.go
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"add new ClusterObjectSet Ready condition reason constants</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h3 id="task-3-rewire-the-cos-controller-writer-to-the-new-reasons-and-messages">Task 3: Rewire the COS controller writer to the new reasons and messages</h3>
+<p>Restructure the condition setters and all call sites in <code>clusterobjectset_controller.go</code>. This is the behavioral core. Update the controller tests in lockstep.</p>
+<p><strong>Files:</strong>
+- Modify: <code>internal/object-controller/controllers/clusterobjectset_controller.go</code> (<code>reconcile</code> body <code>:131-302</code>, <code>archive</code> <code>:316-335</code>, <code>delete</code> <code>:305-314</code>, setters <code>:654-700</code>, <code>verifyObservedPhases</code> <code>:719-746</code>, <code>verifyReferencedSecretsImmutable</code> <code>:748-796</code>)
+- Test: <code>internal/object-controller/controllers/clusterobjectset_controller_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes the Task 2 reason constants and <code>ocv1.ClusterObjectSetTypeReady</code>.
+- Produces this setter API (consumed only within this file):
+  - <code>setReadyWithDeadline(cos *ocv1.ClusterObjectSet, status metav1.ConditionStatus, reason, message string, isDeadlineExceeded bool)</code> — sets <code>Ready</code>; when <code>isDeadlineExceeded</code>, overrides to <code>Ready=False</code>/<code>ProgressDeadlineExceeded</code>.
+  - <code>markReady(cos, reason, message string) bool</code> — <code>Ready=True</code>.
+  - <code>markNotReady(cos, reason, message string) bool</code> — <code>Ready=False</code>, no deadline override (for blocked-class reasons).
+  - <code>setReconciling(cos, detail string, isDeadlineExceeded bool)</code> — <code>Ready=False</code>/<code>Reconciling</code>, deadline-overridable, prefixes the transient message.
+- Condition-reason emission after this task (the only reasons the controller writes):
+  <code>AllObjectsReady</code>, <code>ObjectsNotReady</code>, <code>ValidationFailed</code>, <code>ObjectCollision</code>, <code>MutableReferencedSecret</code>, <code>DigestMismatch</code>, <code>Archiving</code>, <code>Reconciling</code>, <code>Archived</code>, and <code>ReasonProgressDeadlineExceeded</code> (via the deadline override).</p>
+<h4 id="3a-rework-the-setters">3a. Rework the setters</h4>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Rename/rewrite the setter helpers</strong></li>
+</ul>
+<p>Replace <code>setAvailableWithDeadline</code> (<code>:654-671</code>), <code>setRetryingConditions</code> (<code>:673-675</code>), <code>markAsAvailable</code> (<code>:677-685</code>), <code>markAsUnavailable</code> (<code>:687-695</code>) with:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// setReadyWithDeadline sets the Ready condition to the supplied status/reason/message,</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="c1">// unless the progress deadline has been exceeded — in which case it reports</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1">// Ready=False/ProgressDeadlineExceeded instead.</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="kd">func</span><span class="w"> </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="w"> </span><span class="o">*</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionStatus</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">        </span><span class="nx">markNotReady</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonProgressDeadlineExceeded</span><span class="p">,</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">            </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"The object set did not become ready within %d minute(s). Last status: %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">ProgressDeadlineMinutes</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="p">))</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">        </span><span class="k">return</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span><span class="nx">meta</span><span class="p">.</span><span class="nx">SetStatusCondition</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cos</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">Condition</span><span class="p">{</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">        </span><span class="nx">Type</span><span class="p">:</span><span class="w">               </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">,</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">        </span><span class="nx">Status</span><span class="p">:</span><span class="w">             </span><span class="nx">status</span><span class="p">,</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">        </span><span class="nx">Reason</span><span class="p">:</span><span class="w">             </span><span class="nx">reason</span><span class="p">,</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">        </span><span class="nx">Message</span><span class="p">:</span><span class="w">            </span><span class="nx">message</span><span class="p">,</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">        </span><span class="nx">ObservedGeneration</span><span class="p">:</span><span class="w"> </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Generation</span><span class="p">,</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="p">}</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="c1">// setReconciling reports a transient internal error on the Ready condition.</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="kd">func</span><span class="w"> </span><span class="nx">setReconciling</span><span class="p">(</span><span class="nx">cos</span><span class="w"> </span><span class="o">*</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">,</span><span class="w"> </span><span class="nx">detail</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="w">    </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonReconciling</span><span class="p">,</span>
+</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"Encountered a transient error, retrying: %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">detail</span><span class="p">),</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="p">)</span>
+</span><span id="__span-13-23"><a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="p">}</span>
+</span><span id="__span-13-24"><a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a>
+</span><span id="__span-13-25"><a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a><span class="kd">func</span><span class="w"> </span><span class="nx">markReady</span><span class="p">(</span><span class="nx">cos</span><span class="w"> </span><span class="o">*</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-26"><a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">meta</span><span class="p">.</span><span class="nx">SetStatusCondition</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cos</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">Condition</span><span class="p">{</span>
+</span><span id="__span-13-27"><a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a><span class="w">        </span><span class="nx">Type</span><span class="p">:</span><span class="w">               </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">,</span>
+</span><span id="__span-13-28"><a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a><span class="w">        </span><span class="nx">Status</span><span class="p">:</span><span class="w">             </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionTrue</span><span class="p">,</span>
+</span><span id="__span-13-29"><a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a><span class="w">        </span><span class="nx">Reason</span><span class="p">:</span><span class="w">             </span><span class="nx">reason</span><span class="p">,</span>
+</span><span id="__span-13-30"><a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a><span class="w">        </span><span class="nx">Message</span><span class="p">:</span><span class="w">            </span><span class="nx">message</span><span class="p">,</span>
+</span><span id="__span-13-31"><a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a><span class="w">        </span><span class="nx">ObservedGeneration</span><span class="p">:</span><span class="w"> </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Generation</span><span class="p">,</span>
+</span><span id="__span-13-32"><a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-13-33"><a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a><span class="p">}</span>
+</span><span id="__span-13-34"><a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a>
+</span><span id="__span-13-35"><a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a><span class="kd">func</span><span class="w"> </span><span class="nx">markNotReady</span><span class="p">(</span><span class="nx">cos</span><span class="w"> </span><span class="o">*</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-36"><a id="__codelineno-13-36" name="__codelineno-13-36" href="#__codelineno-13-36"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">meta</span><span class="p">.</span><span class="nx">SetStatusCondition</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cos</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">Condition</span><span class="p">{</span>
+</span><span id="__span-13-37"><a id="__codelineno-13-37" name="__codelineno-13-37" href="#__codelineno-13-37"></a><span class="w">        </span><span class="nx">Type</span><span class="p">:</span><span class="w">               </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">,</span>
+</span><span id="__span-13-38"><a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a><span class="w">        </span><span class="nx">Status</span><span class="p">:</span><span class="w">             </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span>
+</span><span id="__span-13-39"><a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="w">        </span><span class="nx">Reason</span><span class="p">:</span><span class="w">             </span><span class="nx">reason</span><span class="p">,</span>
+</span><span id="__span-13-40"><a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a><span class="w">        </span><span class="nx">Message</span><span class="p">:</span><span class="w">            </span><span class="nx">message</span><span class="p">,</span>
+</span><span id="__span-13-41"><a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a><span class="w">        </span><span class="nx">ObservedGeneration</span><span class="p">:</span><span class="w"> </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Generation</span><span class="p">,</span>
+</span><span id="__span-13-42"><a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-13-43"><a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Update <code>markAsArchived</code></strong></li>
+</ul>
+<p>Replace the body of <code>markAsArchived</code> (<code>:697-700</code>):</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">markAsArchived</span><span class="p">(</span><span class="nx">cos</span><span class="w"> </span><span class="o">*</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">markNotReady</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonArchived</span><span class="p">,</span><span class="w"> </span><span class="s">"The object set is archived."</span><span class="p">)</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="3b-rework-the-blocked-class-checks-messages">3b. Rework the blocked-class checks (messages)</h4>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Reword <code>verifyReferencedSecretsImmutable</code>'s error (sorted, actionable)</strong></li>
+</ul>
+<p>In <code>verifyReferencedSecretsImmutable</code> (<code>:790-793</code>), sort the names and reword:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">mutableSecrets</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">        </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">mutableSecrets</span><span class="p">)</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"one or more referenced Secrets are not immutable (must set immutable: true): %s; make them immutable or reference immutable Secrets"</span><span class="p">,</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">            </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">mutableSecrets</span><span class="p">,</span><span class="w"> </span><span class="s">", "</span><span class="p">))</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<p>Add <code>"sort"</code> to the import block.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Reword <code>verifyObservedPhases</code>'s mismatch error (no raw digests, sorted phase names)</strong></li>
+</ul>
+<p>Replace the mismatch accumulation and final error (<code>:732-744</code>) so it names only the phases, sorted, and omits digests:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">mismatched</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">current</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">prev</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">storedMap</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">];</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">prev</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Digest</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">            </span><span class="nx">mismatched</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">mismatched</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%q"</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">))</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">mismatched</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">        </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">mismatched</span><span class="p">)</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">            </span><span class="s">"the resolved content for phase(s) %s no longer matches the digest recorded in status.observedPhases; "</span><span class="o">+</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">                </span><span class="s">"a referenced object source may have been deleted and recreated with different content; "</span><span class="o">+</span>
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">                </span><span class="s">"create a new object set to apply the changes"</span><span class="p">,</span>
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">            </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">mismatched</span><span class="p">,</span><span class="w"> </span><span class="s">", "</span><span class="p">))</span>
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+</span></code></pre></div>
+<p>(The two earlier guards in this function — empty stored, phase-count change — stay as-is; they also surface as <code>DigestMismatch</code>.)</p>
+<h4 id="3c-rewire-the-reconcile-call-sites">3c. Rewire the <code>reconcile</code> call sites</h4>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Blocked-class call sites → <code>markNotReady</code></strong></li>
+</ul>
+<p>In <code>reconcile</code>, update the two blocked paths:
+- <code>:137</code> → <code>markNotReady(cos, ocv1.ClusterObjectSetReasonMutableReferencedSecret, err.Error())</code>
+- <code>:151</code> → <code>markNotReady(cos, ocv1.ClusterObjectSetReasonDigestMismatch, err.Error())</code></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Transient-error call sites → <code>setReconciling</code></strong></li>
+</ul>
+<p>Replace each <code>setRetryingConditions(cos, X, isDeadlineExceeded)</code> / <code>markAsUnavailable(cos, ...Reconciling, err.Error())</code> with <code>setReconciling</code>:
+- <code>:143</code> → <code>setReconciling(cos, err.Error(), isDeadlineExceeded)</code>
+- <code>:157</code> → <code>setReconciling(cos, err.Error(), isDeadlineExceeded)</code>
+- <code>:171</code> (archived path, <code>TrackingCache.Free</code>) → <code>setReconciling(cos, err.Error(), false)</code>
+- <code>:183</code> (establish watch) → <code>setReconciling(cos, werr.Error(), isDeadlineExceeded)</code>
+- <code>:193</code> (revision reconcile) → <code>setReconciling(cos, err.Error(), isDeadlineExceeded)</code>
+- <code>:307</code> (<code>delete</code> path, <code>TrackingCache.Free</code>) → <code>setReconciling(cos, err.Error(), false)</code>
+- <code>:320</code> (<code>archive</code> path, teardown error) → <code>setReconciling(cos, err.Error(), false)</code></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 7: Archiving-in-progress call site → <code>markNotReady</code></strong></li>
+</ul>
+<p>In <code>archive</code> (<code>:323-325</code>), replace the teardown-incomplete <code>setRetryingConditions</code> with:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">tdres</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">tdres</span><span class="p">.</span><span class="nx">IsComplete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">        </span><span class="nx">markNotReady</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonArchiving</span><span class="p">,</span><span class="w"> </span><span class="s">"The object set is being archived; removing owned objects."</span><span class="p">)</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{</span><span class="nx">RequeueAfter</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 8: Validation + collision call sites (deadline-overridable)</strong></li>
+</ul>
+<p>Replace the preflight validation (<code>:199-203</code>), per-phase validation (<code>:205-210</code>), and collision (<code>:219-223</code>) blocks:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rres</span><span class="p">.</span><span class="nx">GetValidationError</span><span class="p">();</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">        </span><span class="nx">l</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%w"</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="p">),</span><span class="w"> </span><span class="s">"preflight validation failed, retrying after 10s"</span><span class="p">)</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">        </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonValidationFailed</span><span class="p">,</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">            </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"Object set manifests are invalid: %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="p">),</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="p">)</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{</span><span class="nx">RequeueAfter</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">pres</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">rres</span><span class="p">.</span><span class="nx">GetPhases</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">pres</span><span class="p">.</span><span class="nx">GetValidationError</span><span class="p">();</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">            </span><span class="nx">l</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%w"</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="p">),</span><span class="w"> </span><span class="s">"phase preflight validation failed, retrying after 10s"</span><span class="p">,</span><span class="w"> </span><span class="s">"phase"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span>
+</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">            </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonValidationFailed</span><span class="p">,</span>
+</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">                </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"Phase %d is invalid: %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="p">),</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="p">)</span>
+</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{</span><span class="nx">RequeueAfter</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>
+</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">collidingObjs</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ores</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">pres</span><span class="p">.</span><span class="nx">GetObjects</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">ores</span><span class="p">.</span><span class="nx">Action</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">machinery</span><span class="p">.</span><span class="nx">ActionCollision</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">                </span><span class="nx">collidingObjs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">collidingObjs</span><span class="p">,</span><span class="w"> </span><span class="nx">ores</span><span class="p">.</span><span class="nx">String</span><span class="p">())</span>
+</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>
+</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">collidingObjs</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a><span class="w">            </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">collidingObjs</span><span class="p">)</span>
+</span><span id="__span-18-25"><a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">            </span><span class="nx">l</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"object collision detected"</span><span class="p">),</span><span class="w"> </span><span class="s">"object collision, retrying after 10s"</span><span class="p">,</span><span class="w"> </span><span class="s">"phase"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"collisions"</span><span class="p">,</span><span class="w"> </span><span class="nx">collidingObjs</span><span class="p">)</span>
+</span><span id="__span-18-26"><a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="w">            </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonObjectCollision</span><span class="p">,</span>
+</span><span id="__span-18-27"><a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a><span class="w">                </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"Object(s) in phase %d are managed by another object set:\n%s"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">collidingObjs</span><span class="p">,</span><span class="w"> </span><span class="s">"\n"</span><span class="p">)),</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="p">)</span>
+</span><span id="__span-18-28"><a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{</span><span class="nx">RequeueAfter</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</span><span id="__span-18-29"><a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-18-30"><a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 9: Drop the bundle version + the bare in-transition RollingOut; set AllObjectsReady / ObjectsNotReady</strong></li>
+</ul>
+<p>Remove the <code>revVersion := ...</code> line (<code>:226</code>) and the <code>if rres.InTransition() { ... }</code> block (<code>:227-229</code>). Replace the completion branch and the else branch (<code>:232-300</code>):</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="w">    </span><span class="c1">//nolint:nestif</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">rres</span><span class="p">.</span><span class="nx">IsComplete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">        </span><span class="c1">// Archive previous revisions</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">        </span><span class="nx">previous</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">listPreviousRevisions</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cos</span><span class="p">)</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"listing previous revisions: %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">previous</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">            </span><span class="nx">patch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="s">`{"spec":{"lifecycleState":"Archived"}}`</span><span class="p">)</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">Patch</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">(</span><span class="nx">a</span><span class="p">),</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">RawPatch</span><span class="p">(</span><span class="nx">types</span><span class="p">.</span><span class="nx">MergePatchType</span><span class="p">,</span><span class="w"> </span><span class="nx">patch</span><span class="p">));</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"archive previous Revision: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
+</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">        </span><span class="nx">markReady</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonAllObjectsReady</span><span class="p">,</span><span class="w"> </span><span class="s">"All objects are ready and pass their probes."</span><span class="p">)</span>
+</span><span id="__span-19-16"><a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>
+</span><span id="__span-19-17"><a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">CompletedAt</span><span class="p">.</span><span class="nx">IsZero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-18"><a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">            </span><span class="nx">cos</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">CompletedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">NewTime</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Clock</span><span class="p">.</span><span class="nx">Now</span><span class="p">())</span>
+</span><span id="__span-19-19"><a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-20"><a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-21"><a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">notReadyMsgs</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+</span><span id="__span-19-22"><a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">pres</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">rres</span><span class="p">.</span><span class="nx">GetPhases</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-23"><a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">pres</span><span class="p">.</span><span class="nx">IsComplete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-24"><a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">                </span><span class="k">continue</span>
+</span><span id="__span-19-25"><a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-19-26"><a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ores</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">pres</span><span class="p">.</span><span class="nx">GetObjects</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-27"><a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">                </span><span class="nx">pr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ores</span><span class="p">.</span><span class="nx">ProbeResults</span><span class="p">()[</span><span class="nx">boxcutter</span><span class="p">.</span><span class="nx">ProgressProbeType</span><span class="p">]</span>
+</span><span id="__span-19-28"><a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">pr</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">machinerytypes</span><span class="p">.</span><span class="nx">ProbeStatusTrue</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-29"><a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="w">                    </span><span class="k">continue</span>
+</span><span id="__span-19-30"><a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="w">                </span><span class="p">}</span>
+</span><span id="__span-19-31"><a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="w">                </span><span class="nx">obj</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ores</span><span class="p">.</span><span class="nx">Object</span><span class="p">()</span>
+</span><span id="__span-19-32"><a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="w">                </span><span class="nx">gvk</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">obj</span><span class="p">.</span><span class="nx">GetObjectKind</span><span class="p">().</span><span class="nx">GroupVersionKind</span><span class="p">()</span>
+</span><span id="__span-19-33"><a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="w">                </span><span class="nx">notReadyMsgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">notReadyMsgs</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span>
+</span><span id="__span-19-34"><a id="__codelineno-19-34" name="__codelineno-19-34" href="#__codelineno-19-34"></a><span class="w">                    </span><span class="s">"Object %s.%s %s/%s: %v"</span><span class="p">,</span>
+</span><span id="__span-19-35"><a id="__codelineno-19-35" name="__codelineno-19-35" href="#__codelineno-19-35"></a><span class="w">                    </span><span class="nx">gvk</span><span class="p">.</span><span class="nx">Kind</span><span class="p">,</span><span class="w"> </span><span class="nx">gvk</span><span class="p">.</span><span class="nx">GroupVersion</span><span class="p">().</span><span class="nx">String</span><span class="p">(),</span>
+</span><span id="__span-19-36"><a id="__codelineno-19-36" name="__codelineno-19-36" href="#__codelineno-19-36"></a><span class="w">                    </span><span class="nx">obj</span><span class="p">.</span><span class="nx">GetNamespace</span><span class="p">(),</span><span class="w"> </span><span class="nx">obj</span><span class="p">.</span><span class="nx">GetName</span><span class="p">(),</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">pr</span><span class="p">.</span><span class="nx">Messages</span><span class="p">,</span><span class="w"> </span><span class="s">" and "</span><span class="p">),</span>
+</span><span id="__span-19-37"><a id="__codelineno-19-37" name="__codelineno-19-37" href="#__codelineno-19-37"></a><span class="w">                </span><span class="p">))</span>
+</span><span id="__span-19-38"><a id="__codelineno-19-38" name="__codelineno-19-38" href="#__codelineno-19-38"></a><span class="w">                </span><span class="k">break</span>
+</span><span id="__span-19-39"><a id="__codelineno-19-39" name="__codelineno-19-39" href="#__codelineno-19-39"></a><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-19-40"><a id="__codelineno-19-40" name="__codelineno-19-40" href="#__codelineno-19-40"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-41"><a id="__codelineno-19-41" name="__codelineno-19-41" href="#__codelineno-19-41"></a>
+</span><span id="__span-19-42"><a id="__codelineno-19-42" name="__codelineno-19-42" href="#__codelineno-19-42"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">isDeadlineExceeded</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-43"><a id="__codelineno-19-43" name="__codelineno-19-43" href="#__codelineno-19-43"></a><span class="w">            </span><span class="c1">// Deadline wins; use the generic summary as the "last status" so the</span>
+</span><span id="__span-19-44"><a id="__codelineno-19-44" name="__codelineno-19-44" href="#__codelineno-19-44"></a><span class="w">            </span><span class="c1">// reconstructed ClusterExtension ProgressDeadlineExceeded message is stable.</span>
+</span><span id="__span-19-45"><a id="__codelineno-19-45" name="__codelineno-19-45" href="#__codelineno-19-45"></a><span class="w">            </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonObjectsNotReady</span><span class="p">,</span><span class="w"> </span><span class="s">"Objects are not yet ready."</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-19-46"><a id="__codelineno-19-46" name="__codelineno-19-46" href="#__codelineno-19-46"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-47"><a id="__codelineno-19-47" name="__codelineno-19-47" href="#__codelineno-19-47"></a><span class="w">            </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">notReadyMsgs</span><span class="p">)</span>
+</span><span id="__span-19-48"><a id="__codelineno-19-48" name="__codelineno-19-48" href="#__codelineno-19-48"></a><span class="w">            </span><span class="nx">msg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Objects are not yet ready."</span>
+</span><span id="__span-19-49"><a id="__codelineno-19-49" name="__codelineno-19-49" href="#__codelineno-19-49"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">notReadyMsgs</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-50"><a id="__codelineno-19-50" name="__codelineno-19-50" href="#__codelineno-19-50"></a><span class="w">                </span><span class="nx">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%d object(s) are not yet ready:\n%s"</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">notReadyMsgs</span><span class="p">),</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">notReadyMsgs</span><span class="p">,</span><span class="w"> </span><span class="s">"\n"</span><span class="p">))</span>
+</span><span id="__span-19-51"><a id="__codelineno-19-51" name="__codelineno-19-51" href="#__codelineno-19-51"></a><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-19-52"><a id="__codelineno-19-52" name="__codelineno-19-52" href="#__codelineno-19-52"></a><span class="w">            </span><span class="nx">setReadyWithDeadline</span><span class="p">(</span><span class="nx">cos</span><span class="p">,</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonObjectsNotReady</span><span class="p">,</span><span class="w"> </span><span class="nx">msg</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-19-53"><a id="__codelineno-19-53" name="__codelineno-19-53" href="#__codelineno-19-53"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-54"><a id="__codelineno-19-54" name="__codelineno-19-54" href="#__codelineno-19-54"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">hasDeadline</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">isDeadlineExceeded</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-55"><a id="__codelineno-19-55" name="__codelineno-19-55" href="#__codelineno-19-55"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{</span><span class="nx">RequeueAfter</span><span class="p">:</span><span class="w"> </span><span class="nx">remaining</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</span><span id="__span-19-56"><a id="__codelineno-19-56" name="__codelineno-19-56" href="#__codelineno-19-56"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-19-57"><a id="__codelineno-19-57" name="__codelineno-19-57" href="#__codelineno-19-57"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-19-58"><a id="__codelineno-19-58" name="__codelineno-19-58" href="#__codelineno-19-58"></a>
+</span><span id="__span-19-59"><a id="__codelineno-19-59" name="__codelineno-19-59" href="#__codelineno-19-59"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">Result</span><span class="p">{},</span><span class="w"> </span><span class="kc">nil</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 10: Remove the now-unused <code>labels</code> import if orphaned</strong></li>
+</ul>
+<p>Run: <code>go build ./internal/object-controller/...</code>
+If the build reports <code>labels</code> imported and not used (the <code>BundleVersionKey</code> reference was the only use in this file besides <code>OwnerNameKey</code>), keep it — <code>labels.OwnerNameKey</code> is still used at <code>:443</code>, <code>:531</code>. Expected: builds (import still needed). If it errors, remove the unused import.</p>
+<h4 id="3d-update-the-controller-tests">3d. Update the controller tests</h4>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 11: Update existing test expectations to the new reasons/messages</strong></li>
+</ul>
+<p>In <code>clusterobjectset_controller_test.go</code>, update the assertions:
+- Reconcile/factory error cases (<code>:89</code>, <code>:120</code>, <code>:145</code>) now expect <code>ocv1.ClusterObjectSetReasonReconciling</code> with message <code>"Encountered a transient error, retrying: some error"</code> (and <code>"...: failed to create revision engine"</code> for the factory case). Update the message asserts accordingly.
+- The seeded condition at <code>:103-108</code> should use <code>ocv1.ClusterObjectSetReasonAllObjectsReady</code>.
+- RollingOut rollout cases (<code>:167-168</code>, <code>:368-369</code>) now expect <code>ocv1.ClusterObjectSetReasonObjectsNotReady</code> and message <code>"Objects are not yet ready."</code> (no per-object probe detail configured → generic fallback).
+- ProbeFailure cases (<code>:255</code>, <code>:343</code>) now expect <code>ocv1.ClusterObjectSetReasonObjectsNotReady</code>; assert the message starts with <code>"1 object(s) are not yet ready:\n"</code> via <code>require.Contains</code>.
+- The <code>ProbesSucceeded</code> success case (<code>:374...</code> "set Available:True:ProbesSucceeded...") now expects <code>ocv1.ClusterObjectSetReasonAllObjectsReady</code> and message <code>"All objects are ready and pass their probes."</code>
+- Rename the cosmetic <code>name:</code> strings from <code>Available:...</code> to <code>Ready:...</code> for readability.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 12: Add a test — completedAt stamped once on AllObjectsReady</strong></li>
+</ul>
+<p>Add a table case (mirroring the existing success case harness: <code>revisionResultConfig{isComplete: true}</code>) that reconciles twice with a <code>clocktesting.NewFakeClock</code> and asserts <code>status.completedAt</code> is non-zero after the first reconcile and byte-identical after the second (clock advanced). Assertion sketch:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="w">            </span><span class="nx">validate</span><span class="p">:</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Client</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">                </span><span class="nx">rev</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSet</span><span class="p">{}</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">                </span><span class="nx">require</span><span class="p">.</span><span class="nx">NoError</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">Context</span><span class="p">(),</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">ObjectKey</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">clusterObjectSetName</span><span class="p">},</span><span class="w"> </span><span class="nx">rev</span><span class="p">))</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">                </span><span class="nx">cond</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">meta</span><span class="p">.</span><span class="nx">FindStatusCondition</span><span class="p">(</span><span class="nx">rev</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">Conditions</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetTypeReady</span><span class="p">)</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">                </span><span class="nx">require</span><span class="p">.</span><span class="nx">Equal</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonAllObjectsReady</span><span class="p">,</span><span class="w"> </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Reason</span><span class="p">)</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">                </span><span class="nx">require</span><span class="p">.</span><span class="nx">False</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">rev</span><span class="p">.</span><span class="nx">Status</span><span class="p">.</span><span class="nx">CompletedAt</span><span class="p">.</span><span class="nx">IsZero</span><span class="p">())</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">            </span><span class="p">},</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 13: Add a test — deadline override for ObjectsNotReady but not for blocked-class</strong></li>
+</ul>
+<p>Add two cases:
+1. A not-complete reconcile with <code>spec.progressDeadlineMinutes</code> set and the fake clock advanced past it → expect <code>Ready=False</code>, reason <code>ocv1.ReasonProgressDeadlineExceeded</code>, message containing <code>"did not become ready within"</code> and <code>"Last status: Objects are not yet ready."</code>.
+2. A <code>verifyReferencedSecretsImmutable</code> failure (mutable referenced Secret) with the deadline also exceeded → expect reason <code>ocv1.ClusterObjectSetReasonMutableReferencedSecret</code> (NOT <code>ProgressDeadlineExceeded</code>), proving blocked wins. Seed a mutable <code>corev1.Secret</code> referenced by a <code>ref</code> object and an exceeded deadline.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 14: Run the controller tests</strong></li>
+</ul>
+<p>Run: <code>go test ./internal/object-controller/... -run Test_ClusterObjectSetReconciler -v</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 15: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>git<span class="w"> </span>add<span class="w"> </span>internal/object-controller/
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"rewire ClusterObjectSet controller to specific Ready reasons</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h3 id="task-4-update-the-clusterextension-roll-up-reader">Task 4: Update the ClusterExtension roll-up reader</h3>
+<p><code>common_controller.go</code> reconstructs the CE <code>Progressing</code>/<code>Installed</code> conditions from the COS condition by switching on its reason. Preserve the existing CE-visible <strong>reasons</strong> under the new reason set via a single classification helper. (The condition-type lookups already read the COS <code>Ready</code> condition and the CE still emits <code>Available</code> — that decoupling was done in Task 1 and is not touched here. Messages flow through from the reworded COS messages by design.)</p>
+<p><strong>Files:</strong>
+- Modify: <code>internal/operator-controller/controllers/common_controller.go</code> (<code>determineFailureReason</code> <code>:146-158</code>, <code>progressingFromAvailable</code> <code>:233-263</code>)
+- Test: <code>internal/operator-controller/controllers/common_controller_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes the Task 2 reason constants.
+- Produces (file-local): <code>func isClusterObjectSetErrorReason(reason string) bool</code> — true for <code>Reconciling</code>, <code>ValidationFailed</code>, <code>ObjectCollision</code> (the reasons that roll up to a CE failure, as the old <code>Reconciling</code> did).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Add the error-reason classifier</strong></li>
+</ul>
+<p>Add near <code>determineFailureReason</code>:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// isClusterObjectSetErrorReason reports whether a ClusterObjectSet Ready-condition</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="c1">// reason represents an error (as the former single "Reconciling" reason did), which</span>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="c1">// the ClusterExtension surfaces as an installation failure.</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="kd">func</span><span class="w"> </span><span class="nx">isClusterObjectSetErrorReason</span><span class="p">(</span><span class="nx">reason</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonReconciling</span><span class="p">,</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">        </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonValidationFailed</span><span class="p">,</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">        </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonObjectCollision</span><span class="p">:</span>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span>
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">    </span><span class="k">default</span><span class="p">:</span>
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a><span class="p">}</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Update <code>determineFailureReason</code></strong></li>
+</ul>
+<p>Replace the Reconciling check (<code>:153-156</code>) and refresh the doc comment wording from "Available" to "Ready":</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="w">    </span><span class="c1">// An error reason on the Ready condition indicates an error occurred.</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">availableCond</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">isClusterObjectSetErrorReason</span><span class="p">(</span><span class="nx">availableCond</span><span class="p">.</span><span class="nx">Reason</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonFailed</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonAbsent</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Update the <code>progressingFromAvailable</code> switch</strong></li>
+</ul>
+<p>Replace the switch (<code>:249-261</code>) so blocked-class reasons map to CE <code>Blocked</code>, error reasons to <code>Retrying</code>, and everything else to <code>RollingOut</code>:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">available</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonMutableReferencedSecret</span><span class="p">,</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">        </span><span class="nx">available</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ClusterObjectSetReasonDigestMismatch</span><span class="p">:</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonBlocked</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">available</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonProgressDeadlineExceeded</span><span class="p">:</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">metav1</span><span class="p">.</span><span class="nx">ConditionFalse</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonProgressDeadlineExceeded</span>
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">isClusterObjectSetErrorReason</span><span class="p">(</span><span class="nx">available</span><span class="p">.</span><span class="nx">Reason</span><span class="p">):</span>
+</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonRetrying</span>
+</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="w">    </span><span class="k">default</span><span class="p">:</span>
+</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="w">        </span><span class="c1">// ObjectsNotReady, AllObjectsReady-but-not-yet-complete, Archiving.</span>
+</span><span id="__span-24-13"><a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a><span class="w">        </span><span class="nx">cond</span><span class="p">.</span><span class="nx">Reason</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ocv1</span><span class="p">.</span><span class="nx">ReasonRollingOut</span>
+</span><span id="__span-24-14"><a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Update the reader tests</strong></li>
+</ul>
+<p>In <code>common_controller_test.go</code>:
+- Replace <code>ocv1.ClusterObjectSetReasonBlocked</code> cases (<code>:480</code>, <code>:531</code>) with <code>ocv1.ClusterObjectSetReasonMutableReferencedSecret</code> (and add a <code>ClusterObjectSetReasonDigestMismatch</code> case) — both must still yield CE <code>Progressing=False/Blocked</code> and <code>Installed</code> reason <code>Absent</code> (digest/secret are not error reasons).
+- Replace <code>ocv1.ClusterObjectSetReasonProbeFailure</code> case (<code>:519</code>) with <code>ocv1.ClusterObjectSetReasonObjectsNotReady</code> → still <code>RollingOut</code>.
+- Replace the success <code>ocv1.ClusterObjectSetReasonProbesSucceeded</code> (<code>:507</code>) with <code>ocv1.ClusterObjectSetReasonAllObjectsReady</code>.
+- Add cases asserting <code>ClusterObjectSetReasonValidationFailed</code> and <code>ClusterObjectSetReasonObjectCollision</code> roll up like <code>Reconciling</code>: <code>determineFailureReason</code> → <code>Failed</code>, and <code>progressingFromAvailable</code> → <code>Retrying</code>.
+- Update <code>TestCEEmitsAvailableConditionType</code> (added in Task 1 Step 7) to use <code>ocv1.ClusterObjectSetReasonAllObjectsReady</code> in its fixture now that <code>ProbesSucceeded</code> is going away; the assertions (CE emits <code>Available</code>, not <code>Ready</code>) stay unchanged.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Run the reader tests</strong></li>
+</ul>
+<p>Run: <code>go test ./internal/operator-controller/controllers/... -v</code>
+Expected: PASS — including <code>TestCEEmitsAvailableConditionType</code> (confirms the CE still exposes <code>Available</code> after the reason resplit).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>git<span class="w"> </span>add<span class="w"> </span>internal/operator-controller/
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"map new ClusterObjectSet reasons in ClusterExtension roll-up</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h3 id="task-5-remove-obsolete-reason-constants-and-rewrite-the-status-doc-block">Task 5: Remove obsolete reason constants and rewrite the status doc block</h3>
+<p>With no remaining references, delete the dead constants and finalize the API documentation.</p>
+<p><strong>Files:</strong>
+- Modify: <code>api/v1/clusterobjectset_types.go</code> (reason block; status doc block <code>:493-514</code>)</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Confirm no references to the obsolete constants</strong></li>
+</ul>
+<p>Run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>grep<span class="w"> </span>-rn<span class="w"> </span>--include<span class="o">=</span><span class="s1">'*.go'</span><span class="w"> </span><span class="s1">'ClusterObjectSetReasonBlocked\|ClusterObjectSetReasonProbeFailure\|ClusterObjectSetReasonProbesSucceeded\|ClusterObjectSetReasonRetrying'</span><span class="w"> </span>.
+</span></code></pre></div>
+<p>Expected: no matches.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Delete the obsolete constants</strong></li>
+</ul>
+<p>Remove the four <code>Deprecated:</code> constants (<code>Blocked</code>, <code>ProbeFailure</code>, <code>ProbesSucceeded</code>, <code>Retrying</code>) added in Task 2, leaving the active reason set.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Rewrite the status <code>conditions</code> doc block</strong></li>
+</ul>
+<p>Replace the <code>Available</code>-oriented description (<code>:497-509</code>) with the <code>Ready</code> vocabulary:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="w">    </span><span class="c1">// conditions is an optional list of status conditions describing the state of the</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">    </span><span class="c1">// ClusterObjectSet.</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">    </span><span class="c1">//</span>
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">    </span><span class="c1">// The Ready condition represents the health of the object set.</span>
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">    </span><span class="c1">// True means all objects are ready; False means one or more objects are not</span>
+</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">    </span><span class="c1">// ready or the object set cannot progress; Unknown is the initial state, before</span>
+</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">    </span><span class="c1">// the first reconciliation has evaluated the object set.</span>
+</span><span id="__span-27-8"><a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">    </span><span class="c1">//   - True with reason AllObjectsReady: all objects are ready and pass their probes.</span>
+</span><span id="__span-27-9"><a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a><span class="w">    </span><span class="c1">//   - False with reason ObjectsNotReady: one or more objects are not yet ready.</span>
+</span><span id="__span-27-10"><a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="w">    </span><span class="c1">//   - False with reason ValidationFailed: the object set manifests failed preflight validation.</span>
+</span><span id="__span-27-11"><a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a><span class="w">    </span><span class="c1">//   - False with reason ObjectCollision: one or more objects are managed by another object set.</span>
+</span><span id="__span-27-12"><a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a><span class="w">    </span><span class="c1">//   - False with reason MutableReferencedSecret: a referenced Secret is not immutable.</span>
+</span><span id="__span-27-13"><a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a><span class="w">    </span><span class="c1">//   - False with reason DigestMismatch: resolved content changed after creation.</span>
+</span><span id="__span-27-14"><a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a><span class="w">    </span><span class="c1">//   - False with reason ProgressDeadlineExceeded: the object set did not become ready within spec.progressDeadlineMinutes.</span>
+</span><span id="__span-27-15"><a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a><span class="w">    </span><span class="c1">//   - False with reason Archiving: the object set is being archived.</span>
+</span><span id="__span-27-16"><a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a><span class="w">    </span><span class="c1">//   - False with reason Archived: the object set has been archived and its objects torn down.</span>
+</span><span id="__span-27-17"><a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a><span class="w">    </span><span class="c1">//   - False with reason Reconciling: a transient error prevented reconciliation.</span>
+</span><span id="__span-27-18"><a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a><span class="w">    </span><span class="c1">//</span>
+</span><span id="__span-27-19"><a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a><span class="w">    </span><span class="c1">// Rollout completion is recorded separately by status.completedAt.</span>
+</span></code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Build and test</strong></li>
+</ul>
+<p>Run: <code>go build ./... &amp;&amp; go test ./api/... ./internal/object-controller/... ./internal/operator-controller/...</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>git<span class="w"> </span>add<span class="w"> </span>api/v1/clusterobjectset_types.go
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"remove obsolete ClusterObjectSet reasons; document Ready condition</span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h3 id="task-6-regenerate-crd-manifests-and-api-reference-verify">Task 6: Regenerate CRD, manifests, and API reference; verify</h3>
+<p>The printcolumn marker and doc-comment changes must be propagated into the generated experimental CRD YAML, the rendered manifests, and the API reference docs.</p>
+<p><strong>Files (generated — do not hand-edit):</strong>
+- <code>helm/olmv1/base/operator-controller/crd/experimental/olm.operatorframework.io_clusterobjectsets.yaml</code>
+- <code>manifests/experimental.yaml</code>, <code>manifests/experimental-e2e.yaml</code>
+- <code>docs/api-reference/olmv1-api-reference.md</code></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Regenerate</strong></li>
+</ul>
+<p>Run: <code>make generate manifests crd-ref-docs</code>
+(DeepCopy is unaffected — no struct shape changes — but running <code>generate</code> is harmless and matches the documented API-change workflow.)</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Sanity-check the regenerated CRD printcolumn</strong></li>
+</ul>
+<p>Run: <code>grep -n "name: Ready" helm/olmv1/base/operator-controller/crd/experimental/olm.operatorframework.io_clusterobjectsets.yaml</code>
+Expected: the additionalPrinterColumns entry now reads <code>Ready</code> with JSONPath <code>.status.conditions[?(@.type=='Ready')].status</code>; no <code>Available</code> printcolumn remains for this CRD.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Verify everything is in sync</strong></li>
+</ul>
+<p>Run: <code>make verify</code>
+Expected: PASS (no uncommitted generated diffs, lint clean). If <code>make verify</code> reports drift, commit the regenerated files it points to.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Full unit suite</strong></li>
+</ul>
+<p>Run: <code>make test-unit</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
+</ul>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>git<span class="w"> </span>add<span class="w"> </span>helm/<span class="w"> </span>manifests/<span class="w"> </span>docs/api-reference/
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">"regenerate CRD, manifests, and docs for Ready condition</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="s2">Co-Authored-By: Claude Opus 4.8 &lt;noreply@anthropic.com&gt;"</span>
+</span></code></pre></div>
+<hr />
+<h2 id="notes-carried-from-the-spec-deferred-out-of-scope-here">Notes carried from the spec (deferred — out of scope here)</h2>
+<ul>
+<li><strong><code>Superseded</code> reason</strong> (objects adopted by a newer sibling revision) is intentionally <strong>not</strong> implemented in this plan; boxcutter support is confirmed and documented in the spec for a later addition.</li>
+<li>When <code>ClusterObjectDeployment</code> lands, <code>ProgressDeadlineExceeded</code> moves to <code>COD.Progressing</code> and the ClusterExtension should observe COD rather than reading COS directly in <code>common_controller.go</code>. Not part of this plan.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "navigation.top", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../../../js/asciinema-player.min.js"></script>
+      
+    
+  </body>
+</html>

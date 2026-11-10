@@ -1,0 +1,1894 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>operator-controller writes a ClusterObjectDeployment (PR 1) — Implementation Plan - Operator Lifecycle Manager</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/extra.css">
+    
+      <link rel="stylesheet" href="../../../css/terminal-player.css">
+    
+      <link rel="stylesheet" href="../../../css/asciinema-player.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#operator-controller-writes-a-clusterobjectdeployment-pr-1-implementation-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-header__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Operator Lifecycle Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              operator-controller writes a ClusterObjectDeployment (PR 1) — Implementation Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-nav__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Operator Lifecycle Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_design_decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/public-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/olmv1_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/add-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/explore-available-content/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explore Content
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/install-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/upgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/downgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/uninstall-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uninstall an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/catalog-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog queries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-channel-based-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel-Based Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-pin-version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-version-range-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Range Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-z-stream-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Z-Stream Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-grant-api-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grant Access to Your Extension's API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conceptual Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conceptual Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/single-owner-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Single Owner Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/upgrade-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/crd-upgrade-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRD Upgrade Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/controlling-catalog-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Content Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/version-ranges/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Ranges
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/olmv1-api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OLMv1 API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/catalogd-webserver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CatalogD Web Server reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/developer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing OLM v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-focus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Focus
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-1-content-addressed-revision-independent-secret-packing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 1: Content-addressed, revision-independent Secret packing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-2-cod-propagates-bundle-metadata-annotations-onto-each-cos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 2: COD propagates bundle-metadata annotations onto each COS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-3-build-a-cod-applyconfiguration-from-rendered-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 3: Build a COD applyconfiguration from rendered content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-4-render-phases-packed-secrets-cod-generator-seam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 4: Render → phases → packed Secrets → COD (generator seam)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-5-rewrite-boxcutterapply-to-write-a-cod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 5: Rewrite Boxcutter.Apply to write a COD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-6-adoption-parity-no-spurious-revision-for-a-steady-state-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 6: Adoption parity — no spurious revision for a steady-state extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-7-rbac-wiring-and-manifests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 7: RBAC, wiring, and manifests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-8-experimental-e2e-install-and-adoption-via-cod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 8: Experimental e2e — install and adoption via COD
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap-subsequent-prs-not-in-this-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roadmap (subsequent PRs — not in this plan)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#self-review-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-review notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="operator-controller-writes-a-clusterobjectdeployment-pr-1-implementation-plan">operator-controller writes a ClusterObjectDeployment (PR 1) — Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> On the <code>BoxcutterRuntime</code> path, make the operator-controller create and maintain one <code>ClusterObjectDeployment</code> (COD) per <code>ClusterExtension</code> instead of creating <code>ClusterObjectSet</code> (COS) revisions directly; the COD controller owns revision creation/rollout/retention.</p>
+<p><strong>Architecture:</strong> The <code>Boxcutter</code> applier renders objects, runs preflights, packs objects into content-addressed <code>ClusterExtension</code>-owned Secrets, and server-side-applies a single COD whose template carries the ref'd phases plus bundle-metadata annotations. The COD controller creates the COS revisions (copying those annotations onto each COS) and adopts any pre-existing COS in the group. ClusterExtension <strong>status derivation is unchanged in this PR</strong> — it still reads COS revisions by group, which now exist because the COD created them.</p>
+<p><strong>Tech Stack:</strong> Go, controller-runtime, server-side apply (applyconfigurations), gomock, envtest, Godog e2e.</p>
+<p><strong>Spec:</strong> <code>docs/superpowers/specs/2026-10-22-operator-controller-use-cod-design.md</code></p>
+<h2 id="global-constraints">Global Constraints</h2>
+<ul>
+<li>All changes are confined to the <code>BoxcutterRuntime</code> feature-gated path. The Helm path (gate off, standard manifest) and its applier/status are untouched.</li>
+<li>No standard-manifest e2e may be modified; all must pass unchanged. New/changed e2es are <code>@BoxcutterRuntime</code>-tagged and run on the experimental manifest.</li>
+<li>API domain for all generated labels/annotations: <code>olm.operatorframework.io</code> (reuse keys in <code>internal/shared/labels/labels.go</code>).</li>
+<li>Secrets are owned by the <code>ClusterExtension</code>, set at creation (no two-phase owner-ref patch).</li>
+<li>COD name == <code>ext.Name</code> == COS <code>spec.group</code>.</li>
+<li>After changing <code>//+kubebuilder:rbac</code> markers or Helm charts, run <code>make manifests</code> and commit the regenerated files.</li>
+<li>Build tag for object-controller code: <code>!standard</code>. Build tag for image handling: <code>containers_image_openpgp</code>.</li>
+</ul>
+<h2 id="review-focus">Review Focus</h2>
+<ul>
+<li><strong>contentFS == nil (catalog unavailable).</strong> <code>Apply</code> must keep the install healthy using the already-applied COD without generating a new template; today the COS path has an explicit nil branch. Owned by Task 5.</li>
+<li><strong>Pre-existing COS adoption without re-roll.</strong> When the new applier first writes a COD for an extension that already has COS revisions, a steady-state extension must not trigger a spurious new revision (template hash must match). Owned by Task 6.</li>
+<li><strong>Secret name collisions across extensions.</strong> Dropping the revision-name prefix must not let two extensions (or two bundles) with identical object content share a Secret in a way that breaks GC/ownership; names remain unique per owner. Owned by Task 1.</li>
+<li><strong>COD SSA ownership churn.</strong> Re-applying an unchanged COD via SSA must be a no-op (no generation bump, no new revision). Owned by Task 5.</li>
+<li><strong>Bundle annotations missing on COS.</strong> If the COD does not propagate bundle annotations to the COS, the unchanged CE status reader reports an empty installed bundle. Owned by Task 2.</li>
+</ul>
+<hr />
+<h2 id="file-structure">File structure</h2>
+<ul>
+<li><code>internal/operator-controller/applier/secretpacker.go</code> — content-addressed Secret naming; owner-independent of revision (Task 1).</li>
+<li><code>internal/object-controller/controllers/clusterobjectdeployment_controller.go</code> — propagate bundle-metadata annotations COD→COS (Task 2).</li>
+<li><code>internal/operator-controller/applier/clusterobjectdeployment.go</code> <em>(new)</em> — build a COD applyconfiguration from rendered phases + annotations + CE owner (Task 3, 4).</li>
+<li><code>internal/operator-controller/applier/boxcutter.go</code> — rewrite <code>Boxcutter.Apply</code> to write a COD; delete direct-COS mechanics (Task 5).</li>
+<li><code>cmd/operator-controller/main.go</code> — RBAC marker + wiring (Task 7).</li>
+<li>Tests alongside each, plus <code>test/e2e/features/cod_extension_rollout.feature</code> (Task 8).</li>
+</ul>
+<hr />
+<h3 id="task-1-content-addressed-revision-independent-secret-packing">Task 1: Content-addressed, revision-independent Secret packing</h3>
+<p><strong>Files:</strong>
+- Modify: <code>internal/operator-controller/applier/secretpacker.go</code>
+- Test: <code>internal/operator-controller/applier/secretpacker_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: nothing new.
+- Produces: <code>SecretPacker{ OwnerName, SystemNamespace }</code> (field <code>RevisionName</code> removed). <code>Pack(phases []ocv1.ClusterObjectSetPhase) (*PackResult, error)</code> unchanged in signature. Secret names are <code>fmt.Sprintf("%s-%x", p.OwnerName, &lt;sha256-of-sorted-data&gt;[:8])</code>. Secret labels carry <code>labels.OwnerNameKey</code> (no <code>RevisionNameKey</code>).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — in <code>secretpacker_test.go</code>, <code>TestSecretPacker_NameIsRevisionIndependent</code>: pack the same phases with two <code>SecretPacker{OwnerName:"ext"}</code> values and assert the produced <code>Secrets[0].Name</code> are equal and begin with <code>"ext-"</code>; assert <code>Secrets[0].Labels</code> has <code>labels.OwnerNameKey=="ext"</code> and no <code>labels.RevisionNameKey</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestSecretPacker_NameIsRevisionIndependent ./internal/operator-controller/applier/</code>
+Expected: FAIL (field <code>RevisionName</code> still referenced / name has revision prefix).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement</strong> — remove <code>RevisionName</code> from <code>SecretPacker</code>; change <code>secretNameFromData</code> to prefix with <code>p.OwnerName</code>; drop <code>RevisionNameKey</code> from <code>newSecret</code> labels. Leave data-key hashing and gzip logic unchanged.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestSecretPacker ./internal/operator-controller/applier/</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong> — <code>git commit -m "✨ make packed Secret names revision-independent"</code></li>
+</ul>
+<hr />
+<h3 id="task-2-cod-propagates-bundle-metadata-annotations-onto-each-cos">Task 2: COD propagates bundle-metadata annotations onto each COS</h3>
+<p><strong>Files:</strong>
+- Modify: <code>internal/object-controller/controllers/clusterobjectdeployment_controller.go</code> (<code>buildClusterObjectSet</code>)
+- Test: <code>internal/object-controller/controllers/clusterobjectdeployment_controller_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: nothing new.
+- Produces: <code>buildClusterObjectSet</code> copies the COD's bundle-metadata annotations (the keys in <code>internal/shared/labels/labels.go</code>: <code>PackageNameKey</code>, <code>BundleNameKey</code>, <code>BundleVersionKey</code>, <code>BundleReleaseKey</code>, <code>BundleReferenceKey</code>) from <code>cod.Annotations</code> onto the created COS's <code>Annotations</code>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — <code>Test_ClusterObjectDeploymentReconciler_PropagatesBundleAnnotations</code>: create a COD (via <code>codFixture()</code>) with <code>cod.Annotations = {BundleNameKey:"b", BundleVersionKey:"1.0.0+2", BundleReferenceKey:"reg/x@sha256:...", PackageNameKey:"p"}</code>; reconcile; <code>getCOS(..., "test-cod-1-1")</code> and assert those four annotation keys/values are present on the COS; assert a non-bundle annotation on the COD is <strong>not</strong> copied.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run Test_ClusterObjectDeploymentReconciler_PropagatesBundleAnnotations ./internal/object-controller/controllers/</code>
+Expected: FAIL (COS has no annotations).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement</strong> — in <code>buildClusterObjectSet</code>, set <code>ObjectMeta.Annotations</code> to the subset of <code>cod.Annotations</code> whose keys are in the known bundle-metadata set (define a package-level <code>bundleAnnotationKeys</code> slice referencing the <code>labels</code> constants).</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp ./internal/object-controller/controllers/</code>
+Expected: PASS (existing COD tests still pass).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong> — <code>git commit -m "✨ propagate bundle annotations from ClusterObjectDeployment to its revisions"</code></li>
+</ul>
+<hr />
+<h3 id="task-3-build-a-cod-applyconfiguration-from-rendered-content">Task 3: Build a COD applyconfiguration from rendered content</h3>
+<p><strong>Files:</strong>
+- Create: <code>internal/operator-controller/applier/clusterobjectdeployment.go</code>
+- Test: <code>internal/operator-controller/applier/clusterobjectdeployment_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>PhaseSort</code> (existing, <code>applier/phase.go</code>), <code>defaultProgressionProbes</code> (existing, <code>boxcutter.go</code>), the bundle-annotation keys (<code>internal/shared/labels</code>).
+- Produces: <code>buildClusterObjectDeployment(objects []ocv1ac.ClusterObjectSetObjectApplyConfiguration, ext *ocv1.ClusterExtension, annotations map[string]string, collisionProtection ocv1.CollisionProtection) *ocv1ac.ClusterObjectDeploymentApplyConfiguration</code>. Sets <code>metadata.name = ext.Name</code>, <code>metadata.annotations = annotations</code>, <code>metadata.labels = {OwnerKindKey: ClusterExtensionKind, OwnerNameKey: ext.Name}</code>, and <code>spec.template.spec</code> with <code>WithPhases(PhaseSort(objects)...)</code>, <code>WithProgressionProbes(defaultProgressionProbes...)</code>, <code>WithCollisionProtection(collisionProtection)</code>, and <code>WithProgressDeadlineMinutes(ext.Spec.ProgressDeadlineMinutes)</code> when <code>&gt; 0</code>.</p>
+<blockquote>
+<p>Depends on the generated <code>ocv1ac.ClusterObjectDeployment*</code> applyconfigurations already present in <code>applyconfigurations/api/v1/</code>.</p>
+</blockquote>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — <code>TestBuildClusterObjectDeployment</code>: given one object and <code>ext{Name:"ext", Spec:{ProgressDeadlineMinutes:15}}</code>, assert the returned config has <code>*Name=="ext"</code>, one phase, <code>*Spec.Template.Spec.CollisionProtection==Prevent</code>, <code>*Spec.Template.Spec.ProgressDeadlineMinutes==15</code>, the owner labels set, and the passed annotations present.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestBuildClusterObjectDeployment ./internal/operator-controller/applier/</code>
+Expected: FAIL (function undefined).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement <code>buildClusterObjectDeployment(...)</code></strong> in the new file, mirroring the structure of the existing <code>SimpleRevisionGenerator.buildClusterObjectSet</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestBuildClusterObjectDeployment ./internal/operator-controller/applier/</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong> — <code>git commit -m "✨ add ClusterObjectDeployment applyconfiguration builder"</code></li>
+</ul>
+<hr />
+<h3 id="task-4-render-phases-packed-secrets-cod-generator-seam">Task 4: Render → phases → packed Secrets → COD (generator seam)</h3>
+<p><strong>Files:</strong>
+- Modify: <code>internal/operator-controller/applier/clusterobjectdeployment.go</code>
+- Test: <code>internal/operator-controller/applier/clusterobjectdeployment_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>ManifestProvider.Get</code>, <code>getBundleAnnotations</code>, <code>SecretPacker.Pack</code>, <code>buildClusterObjectDeployment</code> (Task 3).
+- Produces: a method on a generator type that, given <code>contentFS</code>, <code>ext</code>, <code>objectLabels</code>, <code>revisionAnnotations</code>, returns <code>(*ocv1ac.ClusterObjectDeploymentApplyConfiguration, []corev1.Secret, error)</code> — the COD config with ref'd phases plus the content-addressed Secrets to create. Bundle-metadata annotations (package/bundle name/version/release/reference) are placed on the <strong>COD</strong> metadata. Reuse the existing object-rendering/annotation logic from <code>SimpleRevisionGenerator.GenerateRevision</code> (extract shared helpers rather than duplicating).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — <code>TestGenerateClusterObjectDeployment_PacksAndRefs</code>: with a fake <code>ManifestProvider</code> returning two objects, assert the returned COD config's phases contain only <code>Ref</code>s (no inline <code>Object</code>), the returned Secrets are non-empty and named <code>"&lt;ext&gt;-..."</code>, and the COD metadata carries the bundle annotations from the bundle properties.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestGenerateClusterObjectDeployment ./internal/operator-controller/applier/</code>
+Expected: FAIL (method undefined).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement</strong> the generator method: render objects, build phases, <code>Pack</code> them, replace inline objects with refs (reuse <code>replaceInlineWithRefs</code>/<code>extractPhasesForPacking</code> from <code>boxcutter.go</code>), build the COD via Task 3, and return COD + Secrets.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestGenerateClusterObjectDeployment ./internal/operator-controller/applier/</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong> — <code>git commit -m "✨ generate a packed ClusterObjectDeployment from bundle content"</code></li>
+</ul>
+<hr />
+<h3 id="task-5-rewrite-boxcutterapply-to-write-a-cod">Task 5: Rewrite <code>Boxcutter.Apply</code> to write a COD</h3>
+<p><strong>Files:</strong>
+- Modify: <code>internal/operator-controller/applier/boxcutter.go</code>
+- Test: <code>internal/operator-controller/applier/boxcutter_test.go</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: Task 4 generator; <code>Preflight.Install</code>/<code>Upgrade</code>; CE owner reference.
+- Produces: <code>Boxcutter.Apply(ctx, contentFS fs.FS, ext *ocv1.ClusterExtension, objectLabels, revisionAnnotations map[string]string) (bool, string, error)</code> — <strong>signature unchanged</strong>. New behavior:
+  1. If <code>contentFS == nil</code>: if a COD for <code>ext.Name</code> exists, return <code>(true, "", nil)</code> (maintain current state); else return an error "catalog content unavailable and no deployment installed".
+  2. Else: generate COD + Secrets (Task 4); set the COD owner reference to <code>ext</code>; pick preflight mode (<code>Install</code> when <code>ext.Status.Install == nil</code>, else <code>Upgrade</code>) and run enabled preflights on the rendered objects; create the Secrets (owner ref = <code>ext</code>, <code>ForceOwnership</code>) <strong>before</strong> applying the COD; SSA-apply the COD (<code>FieldOwner</code>, <code>ForceOwnership</code>); return <code>(true, "", nil)</code>.
+- Deletes: <code>createExternalizedRevision</code>, <code>garbageCollectOldRevisions</code>, <code>latestRevisionNumber</code>, the COS SSA-diff state machine, <code>patchSecretOwnerReferences</code>/<code>ensureSecretOwnerReferences</code>, and the <code>ClusterObjectSetRetentionLimit</code>/revision-naming logic.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — <code>TestBoxcutterApply_WritesClusterObjectDeployment</code>: fake client; call <code>Apply</code> with a stub content FS and <code>ext{Name:"ext"}</code>; assert exactly one COD named <code>"ext"</code> exists with owner ref to the CE, its template phases use refs, and the referenced Secrets exist in the system namespace owned by the CE; assert <strong>no</strong> COS is created directly by the applier.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestBoxcutterApply_WritesClusterObjectDeployment ./internal/operator-controller/applier/</code>
+Expected: FAIL (Apply still creates COS).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Implement</strong> the rewrite per the Interfaces block. Keep <code>Preflight</code> invocation and <code>shouldSkipPreflight</code> semantics; replace <code>state</code> selection with the <code>ext.Status.Install</code> check.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Write the failing test for the nil-content and unchanged paths</strong> — <code>TestBoxcutterApply_NilContentUsesExistingCOD</code> (COD exists → <code>(true,...)</code>, none exists → error) and <code>TestBoxcutterApply_UnchangedIsNoop</code> (applying identical content twice does not bump the COD <code>generation</code>).</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Run tests to verify they fail, implement, and verify they pass</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp ./internal/operator-controller/applier/</code>
+Expected: PASS (all applier tests).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 6: Commit</strong> — <code>git commit -m "✨ apply a ClusterObjectDeployment instead of managing ClusterObjectSets"</code></li>
+</ul>
+<hr />
+<h3 id="task-6-adoption-parity-no-spurious-revision-for-a-steady-state-extension">Task 6: Adoption parity — no spurious revision for a steady-state extension</h3>
+<p><strong>Files:</strong>
+- Test: <code>internal/operator-controller/applier/boxcutter_test.go</code> (or an envtest in <code>internal/object-controller/controllers/</code>)</p>
+<p><strong>Interfaces:</strong>
+- Consumes: Task 5 <code>Apply</code>; the COD controller's <code>templateHash</code> behavior.
+- Produces: no new production code if Tasks 1–5 already yield hash parity; otherwise a fix so the COD template operator-controller writes hashes identically to an already-adopted revision.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the failing test</strong> — <code>TestApply_AdoptsExistingRevisionsWithoutReroll</code>: seed a COS in group <code>"ext"</code> whose <code>TemplateHashKey</code> equals the hash of the template the applier would produce for the same content; run <code>Apply</code>; reconcile the COD controller; assert <strong>no</strong> new COS revision (<code>ext-2</code>) is created and the existing revision is adopted (controller owner ref → COD).</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run test to verify it fails or passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestApply_AdoptsExistingRevisionsWithoutReroll ./internal/operator-controller/applier/</code>
+Expected: FAIL if hashes diverge (then fix in Step 3); PASS means parity already holds — record that and proceed.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: If failing, implement</strong> the minimal alignment so operator-controller's template and the COD controller's <code>templateHash</code> agree for identical content (e.g. ensure identical field population/ordering).</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Run test to verify it passes</strong></li>
+</ul>
+<p>Run: <code>go test -tags containers_image_openpgp -run TestApply_AdoptsExistingRevisionsWithoutReroll ./internal/operator-controller/applier/</code>
+Expected: PASS.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong> — <code>git commit -m "✨ adopt pre-existing ClusterObjectSet revisions without re-rollout"</code></li>
+</ul>
+<hr />
+<h3 id="task-7-rbac-wiring-and-manifests">Task 7: RBAC, wiring, and manifests</h3>
+<p><strong>Files:</strong>
+- Modify: <code>cmd/operator-controller/main.go</code> (RBAC marker near the CE reconciler; applier wiring already satisfied by unchanged <code>Apply</code> signature)
+- Modify: generated manifests via <code>make manifests</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: Task 5 applier.
+- Produces: operator-controller ClusterRole gains <code>clusterobjectdeployments</code> verbs <code>create;get;list;watch;update;patch;delete</code> and retains Secret permissions. COS create/patch verbs may be narrowed to <code>get;list;watch;delete</code> (operator-controller no longer creates COS). Keep COS read for the unchanged status path.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Add the <code>//+kubebuilder:rbac</code> marker</strong> for <code>clusterobjectdeployments</code> (and adjust the COS marker) on the CE reconciler.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Regenerate</strong> — <code>make manifests generate</code> ; confirm the operator-controller ClusterRole in <code>manifests/experimental.yaml</code> includes <code>clusterobjectdeployments</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Build</strong> — <code>go build -tags containers_image_openpgp ./...</code>; <code>make lint</code>.
+Expected: builds; <code>0 issues</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Commit</strong> — <code>git commit -m "✨ grant operator-controller RBAC for ClusterObjectDeployments"</code></li>
+</ul>
+<hr />
+<h3 id="task-8-experimental-e2e-install-and-adoption-via-cod">Task 8: Experimental e2e — install and adoption via COD</h3>
+<p><strong>Files:</strong>
+- Create: <code>test/e2e/features/cod_extension_rollout.feature</code> (<code>@BoxcutterRuntime</code>)
+- Possibly add steps in <code>test/e2e/steps/steps.go</code> only if an assertion is missing.</p>
+<p><strong>Interfaces:</strong>
+- Consumes: existing e2e steps (<code>ClusterExtension ... Installed</code>, <code>ClusterObjectSet "&lt;name&gt;-1" ... Ready</code>, <code>ClusterObjectDeployment "&lt;name&gt;" reports ...</code>).</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 1: Write the feature</strong> — Scenario: apply a catalog + <code>ClusterExtension</code>; assert a <code>ClusterObjectDeployment</code> named after the extension exists, a <code>ClusterObjectSet "&lt;ext&gt;-1"</code> becomes <code>Ready</code>, and the <code>ClusterExtension</code> reports <code>Installed=True</code> with the expected bundle in <code>.status.install</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 2: Run against the experimental cluster</strong></li>
+</ul>
+<p>Run: <code>make e2e/cod_extension_rollout KUBECONFIG=$PWD/.kubeconfig/operator-controller-experimental-e2e.kubeconfig</code> (rebuild+load operator-controller and object-controller images first).
+Expected: scenario passes.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 3: Confirm standard e2es are untouched</strong> — <code>git status</code> shows no changes under standard-only features; run a representative standard scenario to confirm no regression.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Step 4: Commit</strong> — <code>git commit -m "✨ add e2e for ClusterExtension rollout via ClusterObjectDeployment"</code></li>
+</ul>
+<hr />
+<h2 id="roadmap-subsequent-prs-not-in-this-plan">Roadmap (subsequent PRs — not in this plan)</h2>
+<ul>
+<li><strong>PR 2:</strong> CE status from the COD — new gated COD-reading path (Available mirror, layered Progressing, generation-gated Installed from COD annotations); remove <code>BoxcutterRevisionStatesGetter</code>/COS reading. Design §4/§5.</li>
+<li><strong>PR 3:</strong> Helm→COD migration + <code>None→Prevent</code> collision flip (label-gated, rollout-gated). Design §6.</li>
+<li><strong>PR 4:</strong> Secret GC — prune content-addressed Secrets no longer referenced by any live revision. Design §2 open item.</li>
+</ul>
+<h2 id="self-review-notes">Self-review notes</h2>
+<ul>
+<li>Spec coverage (PR 1 slice): applier→COD (T3–T5), secrets content-addressed+CE-owned (T1, T5), COD→COS annotation propagation keeping status working (T2), adoption (T6), RBAC/manifests (T7), experimental e2e + standard-unchanged gate (T8). Status refactor, migration, collision flip, secret GC are explicitly deferred to PRs 2–4.</li>
+<li>Review Focus items each mapped to an owning task's test (nil content/unchanged→T5, adoption→T6, secret naming→T1, COS annotations→T2).</li>
+<li>Interfaces: <code>Apply</code> signature preserved (no main.go pipeline change beyond RBAC); <code>SecretPacker.RevisionName</code> removed consistently across T1/T5.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "navigation.top", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../../../js/asciinema-player.min.js"></script>
+      
+    
+  </body>
+</html>

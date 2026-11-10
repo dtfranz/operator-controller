@@ -1,0 +1,1946 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>ClusterObjectSet Ready condition — reasons & messages blueprint - Operator Lifecycle Manager</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/extra.css">
+    
+      <link rel="stylesheet" href="../../../css/terminal-player.css">
+    
+      <link rel="stylesheet" href="../../../css/asciinema-player.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clusterobjectset-ready-condition-reasons-messages-blueprint" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-header__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Operator Lifecycle Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ClusterObjectSet Ready condition — reasons &amp; messages blueprint
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-nav__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Operator Lifecycle Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_design_decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/public-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/olmv1_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/add-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/explore-available-content/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explore Content
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/install-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/upgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/downgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/uninstall-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uninstall an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/catalog-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog queries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-channel-based-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel-Based Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-pin-version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-version-range-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Range Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-z-stream-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Z-Stream Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-grant-api-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grant Access to Your Extension's API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conceptual Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conceptual Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/single-owner-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Single Owner Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/upgrade-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/crd-upgrade-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRD Upgrade Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/controlling-catalog-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Content Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/version-ranges/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Ranges
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/olmv1-api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OLMv1 API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/catalogd-webserver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CatalogD Web Server reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/developer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing OLM v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-decisions-made-during-brainstorming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design decisions made during brainstorming
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#target-blueprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target blueprint
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Target blueprint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ready-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready = True
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ready-false" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready = False
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ready-unknown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready = Unknown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-from-current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping from current state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-failure-taxonomy-validationfailed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation failure taxonomy (ValidationFailed)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-notes-when-this-is-picked-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation notes (when this is picked up)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-follow-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open / follow-on
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="clusterobjectset-ready-condition-reasons-messages-blueprint">ClusterObjectSet <code>Ready</code> condition — reasons &amp; messages blueprint</h1>
+<p><strong>Date:</strong> 2026-09-30
+<strong>Status:</strong> Design blueprint (implementation deferred)
+<strong>Branch context:</strong> <code>replace-available-with-ready</code></p>
+<h2 id="purpose">Purpose</h2>
+<p>Blueprint the target status-condition vocabulary for the <code>ClusterObjectSet</code>
+(COS) health condition, revisited from a UX perspective. Two changes frame this
+work:</p>
+<ol>
+<li>The condition is being <strong>renamed <code>Available</code> → <code>Ready</code></strong> (see the
+   <code>ClusterObjectDeployment</code> layering decision — COS gets <code>Ready</code>, the future
+   <code>ClusterObjectDeployment</code> gets <code>Available</code> + <code>Progressing</code>).</li>
+<li>The reasons/messages are being <strong>revisited for clarity, actionability, and
+   strict semantic boundaries</strong> so COS reads correctly when used standalone
+   (outside ClusterExtension) and when its condition is propagated onto the
+   ClusterExtension.</li>
+</ol>
+<h2 id="design-decisions-made-during-brainstorming">Design decisions made during brainstorming</h2>
+<ul>
+<li><strong>Layering:</strong> rollout/progress reasons (<code>RollingOut</code>, <code>ProgressDeadlineExceeded</code>)
+  stay on COS <strong>for now</strong>, but ultimately belong on <code>ClusterObjectDeployment</code>.
+  <code>ProgressDeadlineExceeded</code> in particular is transitional.</li>
+<li><strong>Verbiage:</strong> drop "revision" and bundle <code>&lt;version&gt;</code> from messages. COS
+  self-describes as <strong>"the object set"</strong> (matches the kind, standalone-safe,
+  reads correctly when propagated onto ClusterExtension). Per-object messages
+  say <strong>"object(s)"</strong>. Bundle version is a CE concept and must not appear.</li>
+<li><strong>Split the overloaded <code>Reconciling</code></strong> (currently ~11 distinct causes) into
+  specific, actionable reasons; keep <code>Reconciling</code> only for truly transient
+  internal errors.</li>
+<li><strong>Split <code>Blocked</code></strong> (currently 2 causes) into two reasons with distinct
+  remediations: <code>MutableReferencedSecret</code> (a referenced Secret is not immutable —
+  a precondition/policy check) and <code>DigestMismatch</code> (current phase content
+  digests no longer match those recorded in <code>status.observedPhases</code> — drift after
+  creation, e.g. a referenced Secret was modified or recreated with different
+  content).</li>
+<li><strong>Add <code>Archiving</code></strong> for teardown-in-progress (distinct from generic transient
+  errors), leading to the terminal <code>Archived</code>.</li>
+<li><strong>Message style:</strong> capitalized, complete sentence, terminal period; avoid raw
+  Go <code>err.Error()</code> jargon except in the transient <code>Reconciling</code> catch-all.</li>
+</ul>
+<h2 id="target-blueprint">Target blueprint</h2>
+<h3 id="ready-true"><code>Ready = True</code></h3>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Trigger</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AllObjectsReady</code></td>
+<td>Rollout complete — <code>rres.IsComplete()</code>: all phases done and every object passes its progress probe. Also stamps <code>status.completedAt</code> (once).</td>
+<td><code>All objects are ready and pass their probes.</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>AllObjectsReady</code> was chosen over <code>ProbesSucceeded</code> (hardcodes the probe
+mechanism), <code>Succeeded</code> (implies terminal completion — that is now tracked by
+<code>status.completedAt</code>; <code>Ready</code> is a live health signal), and bare <code>Ready</code>
+(tautological). It is general, informative, and future-proof if readiness grows
+beyond a single progress probe.</p>
+<h3 id="ready-false"><code>Ready = False</code></h3>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Trigger</th>
+<th>Message (template)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ObjectsNotReady</code></td>
+<td>Not complete and deadline not exceeded: ≥1 object is not yet ready (progress probe pending/failing, or objects still being applied). Absorbs the former <code>RollingOut</code> + <code>ProbeFailure</code> — on the readiness axis these are one state seen at two instants (a pending probe already counts as not-<code>True</code>, <code>clusterobjectset_controller.go:266</code>).</td>
+<td><code>&lt;N&gt; object(s) are not yet ready:\n&lt;per-object detail&gt;</code> (or <code>Objects are not yet ready.</code> before any probe reports)</td>
+<td>readiness-axis reason, symmetric with <code>AllObjectsReady</code>; per-object detail preserved</td>
+</tr>
+<tr>
+<td><code>ProgressDeadlineExceeded</code></td>
+<td><code>isDeadlineExceeded</code> (time since start &gt; <code>spec.progressDeadlineMinutes</code>) on any non-blocked path; wraps the would-be message as "Last status".</td>
+<td><code>The object set did not become ready within &lt;N&gt; minute(s). Last status: &lt;msg&gt;</code></td>
+<td>⚑ transitional → moves to <code>ClusterObjectDeployment.Progressing</code> (the only remaining reason destined for COD)</td>
+</tr>
+<tr>
+<td><code>ValidationFailed</code></td>
+<td>A boxcutter <em>classified</em> preflight validation error — either the static revision check (<code>rres.GetValidationError()</code>) or the per-phase dry-run check (<code>pres.GetValidationError()</code>). See "Validation failure taxonomy" below for the exact causes.</td>
+<td><code>Object set manifests are invalid: &lt;detail&gt;</code> / <code>Phase &lt;N&gt; is invalid: &lt;detail&gt;</code></td>
+<td>split out of <code>Reconciling</code> (preflight + phase validation). Only <em>classified</em> validation errors land here; an unclassified dry-run failure (transient/network, or an APIStatus reason boxcutter does not treat as validation) returns a plain error → <code>Reconciling</code>.</td>
+</tr>
+<tr>
+<td><code>ObjectCollision</code></td>
+<td>≥1 object reports <code>machinery.ActionCollision</code>. This is structurally a <strong>foreign</strong> owner: boxcutter only emits <code>ActionCollision</code> for unknown/foreign controllers (sibling-revision transitions become <code>ActionProgressed</code>, never a collision). No revision comparison needed on our side.</td>
+<td><code>Object(s) in phase &lt;N&gt; are managed by another object set:\n&lt;list&gt;</code></td>
+<td>split out of <code>Reconciling</code></td>
+</tr>
+<tr>
+<td><code>MutableReferencedSecret</code></td>
+<td>≥1 referenced Secret is not immutable — <code>verifyReferencedSecretsImmutable</code> fails (a referenced Secret has <code>immutable != true</code>). A precondition/policy check, <strong>not</strong> drift detection. <strong>Precedence: over the deadline.</strong></td>
+<td><code>One or more referenced Secrets are not immutable. Referenced Secrets must set immutable: true; make them immutable or reference immutable Secrets.</code></td>
+<td>split out of <code>Blocked</code></td>
+</tr>
+<tr>
+<td><code>DigestMismatch</code></td>
+<td>Current phase content digests differ from those recorded in <code>status.observedPhases</code> (<code>verifyObservedPhases</code> fails). Catches any post-creation content change — including a referenced Secret modified, or deleted and recreated with different content. <strong>Precedence: over the deadline.</strong></td>
+<td><code>The resolved content for phase(s) &lt;names&gt; no longer matches the digest recorded in status.observedPhases. A referenced object source may have been deleted and recreated with different content. Create a new object set to apply the changes.</code></td>
+<td>split out of <code>Blocked</code></td>
+</tr>
+<tr>
+<td><code>Archiving</code></td>
+<td><code>spec.lifecycleState=Archived</code> and teardown in progress (teardown error, or owned resources not yet removed).</td>
+<td><code>The object set is being archived; removing owned objects.</code></td>
+<td>new — teardown in progress</td>
+</tr>
+<tr>
+<td><code>Reconciling</code></td>
+<td>Transient internal error: phase build, engine creation, watch establishment, revision reconcile, or cache free.</td>
+<td><code>Encountered a transient error, retrying: &lt;err&gt;</code></td>
+<td>now only transient/internal errors</td>
+</tr>
+<tr>
+<td><code>Archived</code></td>
+<td><code>spec.lifecycleState=Archived</code> and teardown complete.</td>
+<td><code>The object set is archived.</code></td>
+<td>terminal</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precedence (when multiple triggers hold):</strong> <code>MutableReferencedSecret</code> /
+<code>DigestMismatch</code> (blocked) → <code>ProgressDeadlineExceeded</code> →
+<code>ObjectsNotReady</code>. Blocked wins because it is the most actionable; the deadline
+wins over per-object detail so the summarized "Last status" is reported.
+(Precedence is a guideline to finalize during implementation.)</p>
+<h3 id="ready-unknown"><code>Ready = Unknown</code></h3>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Before the first reconcile — the condition is absent (consumers treat a missing condition as <code>Unknown</code>).</td>
+<td><em>(none — condition not yet set)</em></td>
+</tr>
+</tbody>
+</table>
+<h2 id="mapping-from-current-state">Mapping from current state</h2>
+<p>Current (<code>Available</code>) reasons and where they go:</p>
+<table>
+<thead>
+<tr>
+<th>Current reason</th>
+<th>Current message</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ProbesSucceeded</code></td>
+<td><code>Objects are available and pass all probes.</code></td>
+<td><code>AllObjectsReady</code> (generalized; reworded to "ready")</td>
+</tr>
+<tr>
+<td><code>RollingOut</code></td>
+<td><code>Revision &lt;version&gt; is rolling out.</code></td>
+<td>merged → <code>ObjectsNotReady</code></td>
+</tr>
+<tr>
+<td><code>ProbeFailure</code></td>
+<td><code>Object &lt;Kind&gt;.&lt;gv&gt; &lt;ns&gt;/&lt;name&gt;: &lt;msgs&gt;</code> (joined)</td>
+<td>merged → <code>ObjectsNotReady</code> (add count summary; per-object detail kept)</td>
+</tr>
+<tr>
+<td><code>ProgressDeadlineExceeded</code></td>
+<td><code>Revision has not rolled out for &lt;N&gt; minute(s). Last status: &lt;msg&gt;</code></td>
+<td><code>ProgressDeadlineExceeded</code> (reworded; transitional → COD)</td>
+</tr>
+<tr>
+<td><code>Reconciling</code></td>
+<td>raw <code>err.Error()</code> across ~11 sites</td>
+<td>split → <code>ValidationFailed</code>, <code>ObjectCollision</code>, <code>Archiving</code>, and a slimmed <code>Reconciling</code></td>
+</tr>
+<tr>
+<td><code>Blocked</code></td>
+<td>raw <code>err.Error()</code> (2 causes)</td>
+<td>split → <code>MutableReferencedSecret</code>, <code>DigestMismatch</code></td>
+</tr>
+<tr>
+<td><code>Archived</code></td>
+<td><code>revision is archived</code></td>
+<td><code>Archived</code> (reworded/capitalized)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="validation-failure-taxonomy-validationfailed">Validation failure taxonomy (<code>ValidationFailed</code>)</h2>
+<p>Confirmed against boxcutter v0.14.0 (<code>validation/</code> package). Two validators feed
+the two error surfaces the COS controller reads. <code>ValidationFailed</code> covers both.</p>
+<p><strong>A. Revision-level, static preflight</strong> — <code>rres.GetValidationError()</code>
+(<code>*RevisionValidationError</code>), from <code>RevisionValidator.Validate</code> →
+<code>staticValidateMultiplePhases</code>. Runs once, up front, <strong>no API-server contact</strong>:</p>
+<ol>
+<li>Static object-metadata violations (<code>validation/metadata.go</code>
+   <code>validateObjectMetadata</code>): <code>apiVersion</code> empty, <code>kind</code> empty, or any of
+   <code>metadata.{uid,generation,generateName,finalizers,ownerReferences,resourceVersion}</code>
+   non-empty (manifests must not carry these).</li>
+<li>Invalid phase name (<code>validatePhaseName</code>) — not a DNS1035 label.</li>
+<li>Duplicate object across/within phases (<code>checkForObjectDuplicates</code>) — same
+   GVK + namespace + name in more than one phase (<code>PhaseObjectDuplicationError</code>).</li>
+</ol>
+<p><strong>B. Phase-level, dry-run preflight</strong> — <code>pres.GetValidationError()</code>
+(<code>*PhaseValidationError</code>), from <code>PhaseValidator.Validate</code> (<code>machinery/phases.go:198</code>),
+run per phase right before that phase applies. Does everything in A for its
+objects <strong>plus</strong> live checks:</p>
+<ol>
+<li>Namespace-scope violations (<code>validateNamespace</code>, <strong>only</strong> on the namespaced
+   validator, <code>allowNamespaceEscalation=false</code>): <code>MustBeNamespaceScopedResourceError</code>
+   (cluster-scoped resource in a namespaced context), <code>MustBeInNamespaceError</code>
+   (object namespace ≠ owner namespace), <code>meta.NoMatchError</code> (GVK not in cluster).</li>
+<li>API-server dry-run rejection (<code>validateDryRun</code> → <code>DryRunValidationError</code>):
+   SSA dry-run (falling back to create-dry-run on NotFound) rejected with an
+   APIStatus reason of <code>Unauthorized</code>, <code>Forbidden</code>, <code>AlreadyExists</code>, <code>Conflict</code>,
+   <code>Invalid</code>, <code>BadRequest</code>, <code>MethodNotAllowed</code>, <code>RequestEntityTooLarge</code>,
+   <code>UnsupportedMediaType</code>, <code>NotAcceptable</code>, or <code>NotFound</code>; plus the empty-reason
+   case whose message contains <code>"failed to create typed patch object"</code>.</li>
+</ol>
+<p><strong>Boundary:</strong> only <em>classified</em> errors become a validation error. In the phase
+validator, a dry-run failure that is <strong>not</strong> an <code>ObjectValidationError</code> (transient
+network error, or an APIStatus reason outside the list above) is <code>errors.Join</code>-ed
+and returned as a <strong>plain error</strong> — so it flows through the reconcile-error path
+(→ <code>Reconciling</code>), not <code>ValidationFailed</code>. This keeps <code>ValidationFailed</code> meaning
+"the manifests are structurally/semantically bad or the apiserver rejects them,"
+while transient infra hiccups stay in <code>Reconciling</code>.</p>
+<h2 id="implementation-notes-when-this-is-picked-up">Implementation notes (when this is picked up)</h2>
+<p>Primary file: <code>internal/object-controller/controllers/clusterobjectset_controller.go</code>.</p>
+<ul>
+<li>Rename the condition type constant <code>ClusterObjectSetTypeAvailable = "Available"</code>
+  → <code>Ready</code> in <code>api/v1/clusterobjectset_types.go:29</code>; update the doc block
+  (~497-509) and the <code>printcolumn</code> (~563). COS is experimental-only (no
+  standard-channel CRD), so no compat gate blocks the rename.</li>
+<li>Remove the dead <code>ClusterObjectSetReasonRetrying = "Retrying"</code> constant.</li>
+<li>Retire the <code>Blocked</code> reason; add the new reason constants.</li>
+<li>Drop <code>revVersion := cos.GetAnnotations()[labels.BundleVersionKey]</code> from the
+  message paths (~line 226) — bundle version is a CE concept.</li>
+<li>Merge the <code>RollingOut</code> (~228, ~295) and <code>ProbeFailure</code> (~293) paths into a
+  single <code>ObjectsNotReady</code> reason; keep the per-object detail as the message,
+  falling back to a generic line before any probe reports. Drop the bare
+  in-transition <code>RollingOut</code> (~228) as a distinct reason.</li>
+<li>Split <code>setRetryingConditions</code> call sites by cause:</li>
+<li>preflight validation (~201) + phase validation (~208) → <code>ValidationFailed</code></li>
+<li>object collisions (~221) → <code>ObjectCollision</code> (foreign owner only — boxcutter
+    emits <code>ActionCollision</code> solely for unknown/foreign controllers).</li>
+<li>archive teardown incomplete (~324) → <code>Archiving</code></li>
+<li>phase build (~143), engine create (~157), watch (~183), reconcile (~193),
+    cache-free (~171, ~307), archive teardown error (~320) → <code>Reconciling</code></li>
+<li>Split the <code>markAsUnavailable(..., Blocked, ...)</code> sites: referenced-Secret
+  immutability check <code>verifyReferencedSecretsImmutable</code> (~137) →
+  <code>MutableReferencedSecret</code>; resolved-phase digest drift <code>verifyObservedPhases</code>
+  (~151) → <code>DigestMismatch</code>.</li>
+<li>Update readers/tests: <code>internal/operator-controller/controllers/common_controller.go</code>
+  (reads the condition to roll up CE status) and the <code>_test.go</code> files for both
+  controllers. (NB: <code>internal/operator-controller/applier/boxcutter.go</code> asserts a
+  managed <em>Deployment's</em> <code>appsv1.DeploymentAvailable</code> condition — unrelated to the
+  COS condition; do not touch it.)</li>
+<li><strong>Keep the ClusterExtension <code>Available</code> condition — decouple it from the COS rename.</strong>
+  <code>common_controller.go</code> currently copies the COS condition onto the CE <em>verbatim,
+  including <code>.Type</code></em> (<code>setAvailableFromRevisionStates</code>, <code>setActiveRevisionsFromRevisionStates</code>),
+  so a naive rename would silently flip the CE's condition (top-level and
+  <code>status.activeRevisions[].conditions[]</code>) to <code>Ready</code>. The CE contract (documented at
+  <code>clusterextension_types.go:522</code>) must keep exposing <code>Available</code>. So: the reader
+  <em>looks up</em> the COS <code>Ready</code> condition but <em>re-emits</em> onto the CE as a CE-owned
+  <code>TypeAvailable = "Available"</code> constant (new, in <code>common_types.go</code>). This also keeps
+  the CE contract stable across the future COS→COD transition (COD will own <code>Available</code>).
+  The CE <code>Progressing</code>/<code>Installed</code> <strong>reasons</strong> are preserved; the CE <code>Progressing</code>
+  <strong>message</strong> is allowed to change (it flows through from the reworded COS message via
+  <code>progressingFromAvailable</code>) — this is intended.</li>
+<li>Regenerate: <code>make manifests crd-ref-docs</code> (experimental CRD YAML,
+  <code>manifests/experimental*.yaml</code>, <code>docs/api-reference/olmv1-api-reference.md</code>).</li>
+</ul>
+<h2 id="open-follow-on">Open / follow-on</h2>
+<ul>
+<li><strong><code>Superseded</code> reason — DEFERRED (not in this plan; to be added later).</strong> A
+  distinct reason for objects adopted by a newer sibling revision is out of scope
+  for this iteration. The boxcutter research below is retained so it can be picked
+  up when <code>Superseded</code> is added. Until then, a partial supersession surfaces as
+  <code>ObjectsNotReady</code> (phase <code>InTransition() == true</code>).
+  Engine support is already <strong>CONFIRMED (boxcutter v0.14.0)</strong> — boxcutter
+  distinguishes a newer-sibling adoption from a foreign owner, so no
+  revision-comparison logic is needed on our side:</li>
+<li>OLM wires siblings via <code>boxcutter.WithSiblingOwners(siblingObjs)</code>
+    (<code>clusterobjectset_controller.go:491</code>, from <code>listSiblingRevisions</code>).</li>
+<li><code>machinery/objects.go:365-419</code>: a newer sibling owning an object →
+    <code>newObjectResultProgressed</code> → <code>ActionProgressed</code>; an unknown/foreign
+    controller → <code>newObjectResultConflict</code> → <code>ActionCollision</code>. <code>ActionProgressed</code>
+    has a single producer (that path).</li>
+<li>When added, detect <code>Superseded</code> via per-object <code>Action() == machinery.ActionProgressed</code>,
+    or phase-level <code>HasProgressed()</code> (all objects moved) / <code>InTransition()</code>
+    (some moved) in <code>machinery/phases.go</code>.</li>
+<li>Note: a <em>partial</em> supersession sets phase <code>InTransition() == true</code>, which
+    drives the old revision to the in-progress state (<code>ObjectsNotReady</code> after the
+    merge) — so when <code>Superseded</code> is added it must be evaluated before <code>ObjectsNotReady</code>.</li>
+<li>When <code>ClusterObjectDeployment</code> lands: move <code>ProgressDeadlineExceeded</code> to
+  <code>COD.Progressing</code> (the only remaining COS reason destined for COD, now that
+  <code>RollingOut</code> is absorbed into the readiness reason <code>ObjectsNotReady</code>), and
+  rewire ClusterExtension to observe COD (<code>Available</code>/<code>Progressing</code>) rather than
+  reading COS directly in <code>common_controller.go</code>.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "navigation.top", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../../../js/asciinema-player.min.js"></script>
+      
+    
+  </body>
+</html>

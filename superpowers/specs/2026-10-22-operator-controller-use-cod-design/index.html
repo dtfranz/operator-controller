@@ -1,0 +1,2228 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Design: operator-controller delegates revision management to ClusterObjectDeployment - Operator Lifecycle Manager</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/extra.css">
+    
+      <link rel="stylesheet" href="../../../css/terminal-player.css">
+    
+      <link rel="stylesheet" href="../../../css/asciinema-player.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#design-operator-controller-delegates-revision-management-to-clusterobjectdeployment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-header__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Operator Lifecycle Manager
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Design: operator-controller delegates revision management to ClusterObjectDeployment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Operator Lifecycle Manager" class="md-nav__button md-logo" aria-label="Operator Lifecycle Manager" data-md-component="logo">
+      
+  <img src="../../../assets/logo.svg" alt="logo">
+
+    </a>
+    Operator Lifecycle Manager
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/operator-framework/operator-controller" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_community/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_design_decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/olmv1_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../project/public-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-started/olmv1_getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/add-catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/explore-available-content/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explore Content
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/install-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/upgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/downgrade-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downgrade an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/uninstall-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uninstall an Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/catalog-queries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog queries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-channel-based-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Channel-Based Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-pin-version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-version-range-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Range Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-z-stream-upgrades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Z-Stream Upgrades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../howto/how-to-grant-api-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grant Access to Your Extension's API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conceptual Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Conceptual Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/single-owner-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Single Owner Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/upgrade-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/crd-upgrade-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRD Upgrade Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/controlling-catalog-selection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Content Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/version-ranges/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Ranges
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/olmv1-api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OLMv1 API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api-reference/catalogd-webserver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CatalogD Web Server reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribute
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribute
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contribute/developer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing OLM v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#intent-why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intent &amp; why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anti-goals-what-would-make-this-a-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-goals (what would make this a failure)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#background-current-state-verified-against-the-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background: current state (verified against the tree)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background: current state (verified against the tree)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operator-controller-applier-internaloperator-controllerapplierboxcuttergo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        operator-controller applier (internal/operator-controller/applier/boxcutter.go)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secret-packing-internaloperator-controllerappliersecretpackergo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret packing (internal/operator-controller/applier/secretpacker.go)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cod-controller-internalobject-controllercontrollersclusterobjectdeployment_controllergo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        COD controller (internal/object-controller/controllers/clusterobjectdeployment_controller.go)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ce-status-derivation-internaloperator-controllercontrollers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CE status derivation (internal/operator-controller/controllers/)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#target-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-operator-controller-writes-a-cod-instead-of-cos-revisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. operator-controller writes a COD instead of COS revisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-secret-packing-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Secret packing &amp; ownership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-preflights-stay-in-operator-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Preflights stay in operator-controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-clusterextension-status-cod-as-single-source-of-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. ClusterExtension status (COD as single source of truth)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-bundle-metadata-annotations-on-the-cod-generation-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Bundle-metadata annotations on the COD + generation gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-migration-adoption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Migration &amp; adoption
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-retention-archival-already-handled-unchanged" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Retention / archival (already handled / unchanged)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-removed-from-operator-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is removed from operator-controller
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-gating-rollout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature gating &amp; rollout
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Feature gating &amp; rollout">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-dependencies-rbac-builder-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime dependencies &amp; RBAC (builder work)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-items-builder-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open items / builder decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="design-operator-controller-delegates-revision-management-to-clusterobjectdeployment">Design: operator-controller delegates revision management to ClusterObjectDeployment</h1>
+<ul>
+<li><strong>Status:</strong> Draft (for review)</li>
+<li><strong>Date:</strong> 2026-10-22</li>
+<li><strong>Branch:</strong> <code>operator-controller-use-cod</code> (built on <code>main</code> + #3050 <code>progressDeadlineMinutes</code> + #3052 <code>revisionHistoryLimit</code>)</li>
+</ul>
+<h2 id="intent-why">Intent &amp; why</h2>
+<p>Today the operator-controller's <code>ClusterExtension</code> controller manages the entire
+<code>ClusterObjectSet</code> (COS) <strong>revision lifecycle</strong> itself: it computes the desired
+revision, diffs it, creates each COS, packs objects into Secrets, patches owner
+references, and garbage-collects old revisions. Meanwhile a separate
+<code>ClusterObjectDeployment</code> (COD) controller already exists in the object-controller
+binary that is purpose-built to manage COS revisions for a deployment template.</p>
+<p>The two code paths overlap and duplicate revision mechanics (both independently
+build and create COS objects today). The goal of this refactor is an
+<strong>architectural separation of concerns</strong>: make the COD the single owner of COS
+revision lifecycle, and shrink the operator-controller to <em>rendering desired
+content and writing one COD per <code>ClusterExtension</code></em>. This is the direction the
+existing <code>TODO(COD)</code> markers in <code>internal/operator-controller/applier/boxcutter.go</code>
+and <code>internal/object-controller/controllers/clusterobjectset_controller.go</code> point
+toward.</p>
+<h2 id="goals">Goals</h2>
+<ul>
+<li>operator-controller creates and maintains exactly <strong>one COD per <code>ClusterExtension</code></strong>
+  (COD name == <code>ext.Name</code> == COS <code>spec.group</code>), instead of creating COS revisions
+  directly.</li>
+<li>The COD controller is the single component that <strong>creates, archives, retains,
+  and rolls out</strong> COS revisions.</li>
+<li><code>ClusterExtension</code> status (<code>Installed</code>, <code>Available</code>, <code>Progressing</code>,
+  <code>.status.install</code>) is derived from the <strong>COD</strong> (single source of truth for
+  rollout state), plus operator-controller's own pre-apply error reporting.</li>
+<li>Existing installations continue to work across the upgrade:</li>
+<li>Helm-based installs migrate to a <strong>COD</strong> (Helm → COD), which then produces
+    revision 1.</li>
+<li>Pre-existing COS revisions (created by the current operator-controller) are
+    <strong>adopted</strong> by the new COD without a disruptive re-rollout.</li>
+</ul>
+<h2 id="non-goals">Non-goals</h2>
+<ul>
+<li>Changing the COS API or the COS controller's reconcile semantics (archival,
+  probes, collision protection, progress deadline) beyond what is explicitly
+  called out here.</li>
+<li>Moving <strong>archival of predecessor revisions</strong> from the COS controller to the COD
+  controller. That remains a separate <code>TODO(COD)</code> and is out of scope; the COS
+  controller continues to archive its lower-numbered siblings on completion.</li>
+<li>Enriching the COD <code>Progressing</code> condition with the finer COS-level rollout
+  reasons (<code>Retrying</code>/<code>Blocked</code>). We explicitly <strong>accept coarser rollout reasons</strong>
+  (see Decisions).</li>
+<li>Changing deprecation status handling (it is derived from the catalog, not from
+  revisions, and is unaffected).</li>
+</ul>
+<h2 id="anti-goals-what-would-make-this-a-failure">Anti-goals (what would make this a failure)</h2>
+<ul>
+<li>Any window in which <code>ClusterExtension.status.install.bundle</code> reports a bundle
+  that has <strong>not actually rolled out</strong> (this corrupts upgrade-path resolution).</li>
+<li>An upgrade that <strong>re-rolls or disrupts</strong> a healthy, already-installed workload
+  because the new COD does not recognize existing revisions.</li>
+<li>Secret objects leaking (never garbage collected) or being deleted while still
+  referenced by a live revision.</li>
+</ul>
+<h2 id="constraints">Constraints</h2>
+<ul>
+<li><strong>Experimental-only; standard behaviour is frozen.</strong> All changes are confined to
+  the <code>BoxcutterRuntime</code> feature-gated code path. The gate is enabled only in the
+  <strong>experimental</strong> manifest (<code>manifests/experimental.yaml</code>), not the <strong>standard</strong> one
+  (<code>cmd/operator-controller/main.go</code> selects <code>applier.Boxcutter</code> +
+  <code>BoxcutterRevisionStatesGetter</code> + <code>BoxcutterStorageMigrator</code> when the gate is on,
+  and the Helm applier + <code>HelmRevisionStatesGetter</code> when it is off). COS/COD are
+  experimental APIs.</li>
+<li><strong>No standard-manifest e2e may change.</strong> e2e scenarios that run against the
+  standard manifest set must not be modified and must pass <strong>unchanged</strong>. Only
+  experimental e2es (and <code>@BoxcutterRuntime</code>-tagged features) may change behaviour or
+  assertions. Behaviour changes are permitted <strong>only</strong> on the experimental API path.</li>
+<li><strong>The Helm/standard status path is untouched.</strong> The <code>HelmRevisionStatesGetter</code>
+  path and the observable CE conditions/reasons it produces must remain byte-for-byte
+  equivalent. The new COD-based status derivation is a <strong>separate, gated</strong> path — it
+  must not be implemented by mutating the shared <code>common_controller.go</code> helpers in a
+  way that changes the Helm path's output. (Consequence: the "accept coarser
+  Progressing reasons" and "wedged rollout never shows <code>Failed</code>" decisions apply
+  <strong>only</strong> to the experimental path; the standard path keeps its current reasons.)</li>
+</ul>
+<h2 id="background-current-state-verified-against-the-tree">Background: current state (verified against the tree)</h2>
+<h3 id="operator-controller-applier-internaloperator-controllerapplierboxcuttergo">operator-controller applier (<code>internal/operator-controller/applier/boxcutter.go</code>)</h3>
+<ul>
+<li><code>Boxcutter.Apply</code> lists existing COS by group (<code>revisions.ListForGroup</code>, group =
+  <code>ext.Name</code>), generates the desired COS, SSA-diffs refs-vs-refs to classify
+  install/upgrade/unchanged, runs <strong>preflights</strong>, creates the COS with objects
+  <strong>externalized to Secrets</strong>, patches Secret owner refs → COS UID, and
+  <strong>garbage-collects</strong> archived revisions beyond a limit.</li>
+<li><code>SimpleRevisionGenerator</code> builds the COS (<code>buildClusterObjectSet</code>), sets
+  collision protection (<code>Prevent</code> normal, <code>None</code> for Helm-migrated), progression
+  probes, and progress-deadline passthrough.</li>
+<li><code>BoxcutterStorageMigrator.Migrate</code> creates revision 1 directly from a deployed
+  Helm release, marks it <code>CompletedAt</code>, labelled <code>MigratedFromHelmKey</code>.</li>
+</ul>
+<h3 id="secret-packing-internaloperator-controllerappliersecretpackergo">Secret packing (<code>internal/operator-controller/applier/secretpacker.go</code>)</h3>
+<ul>
+<li>Already essentially <strong>content-addressable</strong>: Secret <em>data keys</em> are content
+  hashes (<code>contentHash</code>); Secret <em>name</em> is <code>&lt;RevisionName&gt;-&lt;hash-of-data&gt;</code>
+  (<code>secretNameFromData</code>). The only revision coupling is the <code>RevisionName</code> prefix
+  and the <code>RevisionNameKey</code> label. Secrets are immutable, typed
+  <code>labels.SecretTypeObjectData</code>, in the system namespace.</li>
+</ul>
+<h3 id="cod-controller-internalobject-controllercontrollersclusterobjectdeployment_controllergo">COD controller (<code>internal/object-controller/controllers/clusterobjectdeployment_controller.go</code>)</h3>
+<ul>
+<li><code>For(COD).Owns(COS)</code> plus a <code>Watches</code> mapping COS <code>spec.group</code> → COD name, which
+  <strong>adopts not-yet-owned (orphan) COS in the group</strong>.</li>
+<li>Creates the next revision when the latest active revision's <code>TemplateHashKey</code>
+  label != <code>templateHash(spec.template)</code>; copies <code>Phases</code>, <code>ProgressDeadlineMinutes</code>,
+  <code>ProgressionProbes</code>, <code>CollisionProtection</code> verbatim into the COS.</li>
+<li><code>setAvailable</code>: <code>True/Available</code> if any active (non-archived, non-deleting)
+  revision is COS <code>Ready</code>; else <code>False/Unavailable</code> or <code>False/NoActiveRevision</code>.</li>
+<li><code>Progressing</code>: <code>True/NewClusterObjectSetProgressing</code> while rolling,
+  <code>False/NewClusterObjectSetProgressed</code> on completion (<code>latest.Status.CompletedAt</code>),
+  <code>False/ProgressDeadlineExceeded</code> on deadline breach. <code>setCondition</code> stamps
+  <code>ObservedGeneration = cod.Generation</code>.</li>
+<li>Retention/GC landed in #3052 (<code>garbageCollectArchivedRevisions</code>), keyed by
+  <code>spec.revisionHistoryLimit</code>.</li>
+</ul>
+<h3 id="ce-status-derivation-internaloperator-controllercontrollers">CE status derivation (<code>internal/operator-controller/controllers/</code>)</h3>
+<ul>
+<li><code>BoxcutterRevisionStatesGetter.GetRevisionStates</code> lists COS by group, skips
+  archived, classifies a revision <strong>Installed</strong> when <code>Status.CompletedAt != 0</code>
+  (its bundle metadata → <code>.status.install.bundle</code>) and <strong>RollingOut</strong> otherwise.</li>
+<li>Bundle metadata is read from COS <strong>annotations</strong>: <code>package-name</code>, <code>bundle-name</code>,
+  <code>bundle-version</code>, <code>bundle-release</code>, <code>bundle-reference</code> (<code>internal/shared/labels/labels.go</code>).</li>
+<li><code>common_controller.go</code> maps: <code>Available</code> from the installed revision's COS <code>Ready</code>
+  (re-emitted <code>ProbesSucceeded</code>); <code>Installed</code> True/<code>Succeeded</code> when a completed
+  revision exists, else False/<code>Absent</code>|<code>Failed</code>; <code>Progressing</code> from the latest
+  rolling revision's COS <code>Ready.Reason</code> → <code>RollingOut</code>/<code>Retrying</code>/<code>Blocked</code>/
+  <code>ProgressDeadlineExceeded</code>/<code>Succeeded</code>, <strong>and</strong> from operator-controller's own
+  pre-apply errors (<code>setStatusProgressing</code>: <code>Retrying</code>/<code>Blocked</code>/<code>InvalidConfiguration</code>).</li>
+</ul>
+<h2 id="target-architecture">Target architecture</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ClusterExtension (operator-controller)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  ├─ resolve bundle (catalog)            ── unchanged
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  ├─ unpack content                      ── unchanged
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  ├─ render manifests                    ── unchanged
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  ├─ run preflights (CRD safety)         ── STAYS in operator-controller
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  ├─ pack objects into Secrets           ── STAYS in operator-controller (content-addressed, COD-owned)
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  └─ SSA write ONE ClusterObjectDeployment  ── REPLACES direct COS creation
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        (template = ref'd phases, + bundle-metadata annotations)
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>            │
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            ▼
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>ClusterObjectDeployment (object-controller)   ── single owner of revision lifecycle
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>  ├─ create next COS revision (verbatim template)
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  ├─ retention / GC (revisionHistoryLimit)     ── #3052
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  ├─ progress deadline                         ── #3050
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>  └─ status: Available, Progressing (+ ObservedGeneration)
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>            │
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            ▼
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>ClusterObjectSet (object-controller)          ── unchanged; archives its own predecessors
+</span></code></pre></div>
+<h2 id="detailed-design">Detailed design</h2>
+<h3 id="1-operator-controller-writes-a-cod-instead-of-cos-revisions">1. operator-controller writes a COD instead of COS revisions</h3>
+<p><code>Boxcutter.Apply</code> is refactored to:
+1. Render the desired objects (unchanged <code>ManifestProvider</code> / <code>SimpleRevisionGenerator</code>
+   logic that produces phases).
+2. Run preflights (unchanged).
+3. Pack objects into content-addressed Secrets (see §2).
+4. Build a <strong>COD apply configuration</strong> with:
+   - <code>spec.template.spec</code> = the ref'd phases + <code>progressionProbes</code> +
+     <code>collisionProtection</code> + <code>progressDeadlineMinutes</code> (the fields that used to go
+     on the COS now go on the template; COD copies them to each COS).
+   - <code>metadata.annotations</code> = bundle-metadata annotations (see §4/§5).
+   - owner reference → the <code>ClusterExtension</code>.
+5. Server-side apply the COD (field owner unchanged). The COD controller does the
+   rest (revision creation, archival via COS, retention, rollout).</p>
+<p>The direct COS mechanics removed from operator-controller: <code>createExternalizedRevision</code>,
+<code>garbageCollectOldRevisions</code>, <code>latestRevisionNumber</code>, revision SSA-diff/state
+machine, Secret owner-ref patching to the COS. Secret <em>packing</em> stays.</p>
+<p><code>collisionProtection</code> today is <code>Prevent</code> for normal installs and <code>None</code> for
+Helm-migrated. On the COD template it is a single value per COD; see §5 for how the
+Helm-migration <code>None</code> case is handled.</p>
+<h3 id="2-secret-packing-ownership">2. Secret packing &amp; ownership</h3>
+<ul>
+<li><strong>Keying:</strong> drop the per-revision <code>RevisionName</code> prefix from the Secret name;
+  prefix with the extension/COD name instead (e.g. <code>&lt;ext.Name&gt;-&lt;content-hash&gt;</code>).
+  Data keys remain content hashes. Secrets become <strong>fully content-addressed</strong> and
+  revision-number-independent, so operator-controller can create them without
+  knowing the revision number the COD will assign.</li>
+<li><strong>Ownership:</strong> operator-controller sets the Secret owner reference to the
+  <strong><code>ClusterExtension</code></strong>. The CE object is already in hand during reconcile, so no
+  COD/COS UID lookup or two-phase owner-ref patch is needed, and it is consistent
+  with the COD itself being CE-owned. Secrets cascade-delete when the
+  <code>ClusterExtension</code> is deleted.</li>
+<li><strong>References:</strong> the COD template carries <code>ObjectSourceRef</code>s pointing at these
+  Secrets; the COD controller copies them verbatim into each COS (<code>buildClusterObjectSet</code>
+  already copies <code>Phases</code> as-is), and the COS controller resolves them unchanged.</li>
+<li><strong>Secret GC (builder decision, see Open Items):</strong> because Secrets are CE-owned
+  (not COS-owned), deleting an archived COS during retention does <strong>not</strong> cascade to
+  its Secrets, and old-content Secrets accumulate as the template changes over the
+  CE's lifetime. A pruning pass must delete Secrets in the group that are no longer
+  referenced by <strong>any</strong> live COS revision (active or retained-archived). Content
+  addressing makes this safe: a Secret shared by multiple revisions is retained
+  while any revision references it. Recommended home: the COD controller (it already
+  owns revision GC and can enumerate every revision's refs; it can delete the
+  Secrets regardless of their owner). This must run <strong>after</strong> retention GC and must
+  never delete a Secret referenced by a not-yet-GC'd archived revision.</li>
+<li><strong>Creation ordering:</strong> operator-controller creates the Secrets (owner ref = CE,
+  set directly — the CE exists) <strong>before</strong> applying the COD. Because the COD
+  controller then asynchronously creates a COS referencing those Secrets, there is a
+  brief window where a COS may reference a Secret that is already present (Secrets
+  created first) — the ordering (Secrets → COD) avoids a dangling ref, and the COS
+  controller's normal resolve-with-retry covers any transient lag. CE-ownership
+  removes the old two-phase owner-ref patch entirely (no COD/COS UID needed first).</li>
+<li><strong>Deletion ordering (risk):</strong> with CE-ownership, Secret deletion is driven by the
+  CE's deletion rather than each COS's. The design must ensure referenced Secrets
+  outlive any COS teardown that still needs to resolve them (e.g. via the CE
+  finalizer ordering, so the COD/COS teardown completes before the CE — and thus its
+  Secrets — is garbage collected).</li>
+</ul>
+<h3 id="3-preflights-stay-in-operator-controller">3. Preflights stay in operator-controller</h3>
+<p>CRD-safety <code>Install</code>/<code>Upgrade</code> preflights run in <code>Boxcutter.Apply</code> before the COD is
+written, exactly as today. A preflight failure is surfaced on the CE <code>Progressing</code>
+condition via the existing pre-apply error path (§4) and the COD is not updated.</p>
+<p><strong>Install-vs-Upgrade selection (builder call):</strong> today the choice between
+<code>preflight.Install</code> and <code>preflight.Upgrade</code> is produced by the COS SSA-diff state
+machine (<code>boxcutter.go</code> <code>StateNeedsInstall</code>/<code>StateNeedsUpgrade</code>), which §1 removes.
+Replacement signal: treat it as an <strong>Install</strong> when the extension has no prior
+completed revision, else an <strong>Upgrade</strong> — derivable without reading COS from either
+(a) the existence of the COD / whether it has ever reported
+<code>Progressing=False/NewClusterObjectSetProgressed</code>, or (b) the CE's own current
+<code>.status.install</code> (populated == already installed). Recommended: key off the CE's
+<code>.status.install</code> presence, falling back to a COD <code>Get</code> when status is empty, so no
+COS read is reintroduced. This is the one piece of "current state" operator-controller
+still inspects before writing the COD.</p>
+<h3 id="4-clusterextension-status-cod-as-single-source-of-truth">4. ClusterExtension status (COD as single source of truth)</h3>
+<p>CE status is derived on the <strong>success path</strong> from the COD, and on the <strong>error path</strong>
+from operator-controller's own reconcile errors (unchanged). Concretely:</p>
+<ul>
+<li><strong>Available</strong> — mirror <code>COD.Available</code> onto <code>CE.Available</code>. COD reports <code>True</code>
+  while <em>any</em> active revision is Ready, which preserves availability across
+  upgrades. Reason mapping: <strong>builder decision</strong> — either adopt COD's reasons
+  (<code>Available</code>/<code>Unavailable</code>/<code>NoActiveRevision</code>) or re-map to CE's existing
+  <code>ProbesSucceeded</code> for API compatibility (recommended: re-map <code>True</code> →
+  <code>ProbesSucceeded</code> to minimize client-visible change; pass through the non-ready
+  states).</li>
+<li><strong>Progressing</strong> — <strong>layered</strong>:</li>
+<li>If operator-controller hits a <strong>pre-apply error</strong> (resolution, unpack,
+    preflight), set <code>Progressing</code> from that error as today
+    (<code>Retrying</code>/<code>Blocked</code>/<code>InvalidConfiguration</code>). The COD is not written.</li>
+<li>Otherwise (a valid COD was applied), derive <code>Progressing</code> from
+    <code>COD.Progressing</code>. We <strong>accept the coarser reasons</strong>: COD's
+    <code>NewClusterObjectSetProgressing</code> / <code>NewClusterObjectSetProgressed</code> /
+    <code>ProgressDeadlineExceeded</code>. The finer COS-level <code>Retrying</code>/<code>Blocked</code> rollout
+    reasons are intentionally <strong>not</strong> preserved on the success path.</li>
+<li><strong>Accepted status regression (revisit in a future PR):</strong> because COD does not
+    surface the COS <code>Ready</code> reasons (<code>ObjectCollision</code>/<code>PreconditionsNotMet</code>/
+    <code>InvalidSpecification</code>), a rollout wedged on one of those shows
+    <code>Progressing=True/RollingOut</code> and <code>Installed=False/Absent</code> — <strong>never <code>Failed</code></strong> —
+    until the progress deadline eventually flips <code>Progressing</code> to
+    <code>False/ProgressDeadlineExceeded</code>. This is accepted for now (consistent with the
+    coarser-reasons decision) and will be revisited (likely by enriching COD) in a
+    follow-up.</li>
+<li><strong>Installed + <code>.status.install</code></strong> — update <strong>only</strong> when the COD reports the
+  current rollout complete:</li>
+<li>Condition: <code>COD.Progressing.Status == False</code> and
+    <code>COD.Progressing.Reason == NewClusterObjectSetProgressed</code> <strong>and</strong>
+    <code>COD.Progressing.ObservedGeneration == COD.metadata.generation</code> (the
+    <strong>generation gate</strong>, see §5). When satisfied, set <code>Installed=True/Succeeded</code>
+    and populate <code>.status.install.bundle</code> from the COD's bundle-metadata
+    annotations.</li>
+<li>When the gate is not satisfied, <strong>hold</strong> the previous <code>.status.install</code> (latch
+    behaviour across upgrades). Only clear it / set <code>Installed=False</code> when there has
+    never been a completed revision — detectable via <code>COD.Available ==
+    False/NoActiveRevision</code> together with no prior install.</li>
+</ul>
+<p>On the <code>BoxcutterRuntime</code> path only, <code>BoxcutterRevisionStatesGetter</code> and the
+COS-reading status derivation (<code>boxcutter_reconcile_steps.go</code>) are replaced by a
+COD-reading equivalent, and the CE controller <strong>no longer lists or reads COS
+objects</strong>. The <code>HelmRevisionStatesGetter</code> path (standard manifest) and any shared
+<code>common_controller.go</code> helpers it relies on are <strong>left untouched</strong>; the COD-based
+derivation must be added as a separate, gated path rather than by changing the Helm
+path's observable output.</p>
+<h3 id="5-bundle-metadata-annotations-on-the-cod-generation-gate">5. Bundle-metadata annotations on the COD + generation gate</h3>
+<ul>
+<li>operator-controller sets <strong>annotations</strong> on the COD reflecting the <strong>desired</strong>
+  bundle: <code>package-name</code>, <code>bundle-name</code>, <code>bundle-version</code>, <code>bundle-release</code>,
+  <code>bundle-reference</code> (reusing the existing keys in <code>internal/shared/labels/labels.go</code>).
+  It writes these in the <strong>same apply</strong> as <code>spec.template</code>.</li>
+<li><strong>Annotations, not labels:</strong> several of these values are not label-safe —
+    <code>bundle-reference</code> is an image ref (<code>registry/foo@sha256:...</code>, contains
+    <code>/</code>/<code>:</code>/<code>@</code>, exceeds 63 chars) and <code>bundle-version</code> may carry build metadata
+    (<code>1.0.0+2</code>, contains <code>+</code>). They are COS annotations today for exactly this
+    reason. Annotations, like labels, are <code>metadata</code> and do <strong>not</strong> bump
+    <code>generation</code>, so the gate below is unaffected.</li>
+<li><strong>The two-writer race:</strong> the annotations are written by operator-controller;
+  <code>Progressing</code> is written by the COD controller. Between operator-controller
+  applying a new template+annotations and the COD controller reconciling,
+  <code>COD.Progressing</code> can still read <code>False/NewClusterObjectSetProgressed</code> from the
+  <em>previous</em> rollout while the annotations already describe the <em>new</em> bundle. Copying
+  annotations → <code>.status.install</code> in that window would report the new bundle as
+  installed before it rolled out.</li>
+<li><strong>The gate:</strong> CE trusts the annotations only when
+  <code>COD.Progressing.ObservedGeneration == COD.metadata.generation</code>. A bundle change
+  always changes rendered content (object annotations carry the bundle version),
+  hence changes <code>spec.template</code>, hence bumps <code>metadata.generation</code>. The COD
+  controller stamps <code>ObservedGeneration</code> on the <code>Progressing</code> condition only after
+  it has reconciled the new generation. So in the race window the condition still
+  carries the <em>old</em> generation and CE correctly waits.</li>
+<li>The builder-check verified the gate holds against the current COD controller:
+    any generation bump not matched by a template-hash change still routes through
+    the create-revision path and sets <code>Progressing=True</code> before stamping the new
+    <code>ObservedGeneration</code>, so the gate cannot falsely pass.</li>
+<li><strong>Helm-migration <code>collisionProtection</code>:</strong> see §6 for the <code>None → Prevent</code> flip.
+  The COD template value starts <code>None</code> (to adopt Helm-owned objects) and is flipped
+  to <code>Prevent</code> by operator-controller after the first successful rollout.</li>
+</ul>
+<h3 id="6-migration-adoption">6. Migration &amp; adoption</h3>
+<ul>
+<li><strong>Helm → COD:</strong> <code>BoxcutterStorageMigrator</code> is adapted to create a <strong>COD</strong> (not a
+  COS) from a deployed Helm release. The COD's template starts with
+  <code>collisionProtection: None</code> to adopt the objects the Helm release already owns, and
+  the migrated COD is marked with a <strong>pending-flip label</strong> (see below). The COD
+  controller then creates revision 1. The "mark revision 1 as completed immediately"
+  behaviour that exists today (so the extension is treated as installed during the
+  upgrade window) must be reproduced: because status is now COD-derived, the migrator
+  (or COD) must ensure the migrated revision records <code>CompletedAt</code> and the COD
+  surfaces <code>Progressing=False/Progressed</code> + bundle annotations, so CE reports the
+  prior bundle as installed without re-rolling.</li>
+<li><strong><code>collisionProtection: None → Prevent</code> flip.</strong> The per-revision behaviour today —
+  migrated rev 1 is <code>None</code>, every revision after is <code>Prevent</code> — cannot be expressed
+  directly because the COD template is single-valued. It is reproduced as an explicit
+  flip driven by operator-controller:</li>
+<li>The migrator creates the COD with <code>collisionProtection: None</code> and a
+     pending-flip label (e.g. <code>olm.operatorframework.io/migrated-collision-flip: "true"</code>).</li>
+<li>While the label is present <strong>and</strong> the COD has not yet reported a successful
+     rollout for the current generation (generation gate, §5),
+     operator-controller keeps the desired template at <code>None</code> (does not flip,
+     avoiding a premature rev 2 before rev 1 is healthy).</li>
+<li>Once the COD reports <code>Progressing=False/NewClusterObjectSetProgressed</code> for the
+     current generation, operator-controller sets the desired template
+     <code>collisionProtection: Prevent</code> and removes the pending-flip label. This is a
+     template change, so the COD creates a <code>Prevent</code> rev 2 that hands over rev 1's
+     objects.</li>
+<li><strong>This reproduces proven behaviour.</strong> The current architecture already performs
+    the <code>None → Prevent</code> transition across successive same-group revisions (migrated
+    rev 1 <code>None</code> via <code>GenerateRevisionFromHelmRelease</code>, then <code>Prevent</code> via
+    <code>GenerateRevision</code>); the hand-over works because collision protection guards
+    against <em>foreign</em> owners, not a predecessor revision in the same group. The only
+    new machinery is the label-driven, rollout-gated flip of the single template
+    value. Fresh (non-migrated) installs use <code>Prevent</code> from the start and never carry
+    the label.</li>
+<li><strong>Existing COS adoption:</strong> when the new operator-controller writes a COD named
+  <code>ext.Name</code>, the COD controller's group watch adopts the pre-existing COS revisions
+  in that group (sets the controller owner ref). If the latest existing revision's
+  <code>TemplateHashKey</code> matches the COD template hash, <strong>no new revision is created</strong> and
+  the workload is not disrupted; otherwise a normal rollout of the newly-desired
+  template occurs (the same as any upgrade). The migrator must stamp the
+  <code>TemplateHashKey</code> consistently so a steady-state extension does not trigger a
+  spurious revision on first adoption.</li>
+</ul>
+<h3 id="7-retention-archival-already-handled-unchanged">7. Retention / archival (already handled / unchanged)</h3>
+<ul>
+<li>Retention/GC: COD (<code>revisionHistoryLimit</code>, #3052).</li>
+<li>Archival of predecessors: COS controller, unchanged (out of scope to move).</li>
+</ul>
+<h2 id="what-is-removed-from-operator-controller">What is removed from operator-controller</h2>
+<ul>
+<li>Direct COS creation and the install/upgrade/unchanged state machine in
+  <code>Boxcutter.Apply</code>.</li>
+<li><code>garbageCollectOldRevisions</code>, <code>latestRevisionNumber</code>, <code>createExternalizedRevision</code>.</li>
+<li>COS-based status reading (<code>BoxcutterRevisionStatesGetter</code>, the COS <code>Ready</code>→CE
+  mapping helpers), replaced by COD-based reading.</li>
+<li>Secret owner-ref patching to the COS (Secrets now CE-owned, set directly at
+  creation — no two-phase patch).</li>
+</ul>
+<p>Kept: manifest rendering, preflights, Secret packing.</p>
+<h2 id="feature-gating-rollout">Feature gating &amp; rollout</h2>
+<p>COD is an experimental API; this work lands behind the experimental manifest. The
+standard (non-experimental) path is unaffected until COD graduates. The upgrade from
+a prior experimental operator-controller to this one must exercise the adoption path
+(§6) in <code>test/upgrade-e2e</code>.</p>
+<h3 id="runtime-dependencies-rbac-builder-work">Runtime dependencies &amp; RBAC (builder work)</h3>
+<ul>
+<li><strong>New cross-binary status dependency.</strong> The COD controller lives in the separate
+  <code>object-controller</code> binary; CE/applier/migrator live in <code>operator-controller</code>.
+  After this change, CE status (<code>Installed</code>/<code>Available</code>/<code>Progressing</code>) depends on the
+  object-controller binary being <strong>running</strong> (today only workload apply depends on
+  the COS controller). The experimental manifest must guarantee object-controller is
+  deployed wherever operator-controller runs; if the object-controller is down, CE
+  status will not progress. (Note: per project direction the object-controller is
+  being split into its own image/namespace — the manifest/RBAC work here must track
+  that split.)</li>
+<li><strong>RBAC.</strong> operator-controller currently has RBAC for <code>clusterobjectsets</code> but not
+  <code>clusterobjectdeployments</code>. It must gain <code>create;get;list;watch;update;patch</code>
+  (and <code>delete</code> for cleanup) on <code>clusterobjectdeployments</code>, plus continued Secret
+  permissions. COS create/patch RBAC on operator-controller can be dropped once it no
+  longer creates COS.</li>
+<li><strong>Upgrade ordering.</strong> The §6 adoption path must be validated across a cross-binary
+  upgrade (old operator-controller that created COS directly → new one that writes a
+  COD) in <code>test/upgrade-e2e</code>.</li>
+</ul>
+<h2 id="testing-strategy">Testing strategy</h2>
+<ul>
+<li><strong>Unit:</strong> applier writes the expected COD (template, labels, owner ref, refs);
+  CE status derivation from COD conditions + generation gate (installed only on
+  <code>Progressed</code> + matching <code>ObservedGeneration</code>; held otherwise); secret keying is
+  revision-independent and content-addressed.</li>
+<li><strong>envtest:</strong> COD apply + adoption of pre-existing COS by group; no spurious
+  revision when template hash matches.</li>
+<li><strong>e2e (experimental only):</strong> install → status reports installed bundle; upgrade →
+  <code>.status.install</code> holds the old bundle until the new rollout completes, then flips;
+  Helm → COD migration; availability stays <code>True</code> across an upgrade; secret GC leaves
+  no orphans after retention; the <code>None → Prevent</code> collision flip after migration.
+  New/changed scenarios are <code>@BoxcutterRuntime</code>-tagged and run on the experimental
+  manifest.</li>
+<li><strong>Standard e2es are not modified and must pass unchanged</strong> (the Helm path is
+  untouched). This is a hard acceptance gate for the work.</li>
+</ul>
+<h2 id="open-items-builder-decisions">Open items / builder decisions</h2>
+<ol>
+<li><strong>Secret GC home &amp; algorithm</strong> (§2) — recommended: a pruning pass in the COD
+   controller that deletes group Secrets unreferenced by any live revision, run
+   after retention GC. Must be proven safe against archived-but-retained revisions.</li>
+<li><strong>Available reason mapping</strong> (§4) — recommended: re-map COD <code>True</code> →
+   <code>ProbesSucceeded</code> for client compatibility; otherwise adopt COD reasons.</li>
+<li><strong>Migrated-revision "installed" signalling</strong> (§6) — the exact mechanism by which
+   a Helm→COD migrated install reports installed without re-rolling (reproducing
+   today's immediate-<code>CompletedAt</code> behaviour through the COD).</li>
+<li><strong><code>TemplateHashKey</code> parity on adoption</strong> (§6) — ensure the hash operator-controller
+   would compute for a steady-state extension matches the existing revision's label,
+   so adoption does not trigger a spurious rollout.
+```</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.code.copy", "navigation.top", "navigation.indexes"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+        <script src="../../../js/asciinema-player.min.js"></script>
+      
+    
+  </body>
+</html>
